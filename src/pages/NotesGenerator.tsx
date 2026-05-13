@@ -249,6 +249,8 @@ export const NotesGenerator = () => {
 
     return () => { cancelled = true; };
   }, [selected]);
+
+  /*
    * Builds a plain-text note body from key concepts, formulas, and board tips.
    * Uses the existing createUserNote service which calls POST /api/user-notes.
    */
