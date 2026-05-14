@@ -155,6 +155,8 @@ export default function Settings() {
   }
 
   // ── Section 4: Subscription ───────────────────────────────────────────────
+  useEffect(() => { refreshSubscription(); }, []);
+
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError]     = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState(false);
@@ -696,3 +698,4 @@ export default function Settings() {
     </AppLayout>
   );
 }
+
