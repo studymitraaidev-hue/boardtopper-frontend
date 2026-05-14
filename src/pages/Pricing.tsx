@@ -320,7 +320,7 @@ export const PricingPage = () => {
                       )}
                     </div>
                   ) : (
-                    <Link to={plan.ctaPath}>
+                    <Link to={user ? "/dashboard" : plan.ctaPath}>
                       <Button
                         variant="outline"
                         size="lg"
