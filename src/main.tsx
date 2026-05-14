@@ -12,8 +12,11 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
 
+fetch(import.meta.env['VITE_API_URL'] + '/health').catch(() => {});
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
   </StrictMode>
 );
+
