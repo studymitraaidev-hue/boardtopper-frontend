@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import {
@@ -21,6 +22,7 @@ export const Navbar = () => {
   const [productsOpen, setProductsOpen] = useState(false);
   const location = useLocation();
   const isLanding = location.pathname === '/';
+  const { user } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -125,15 +127,26 @@ export const Navbar = () => {
               <ShieldCheck size={12} className="text-emerald-600" />
               <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">Board Verified</span>
             </div>
-            <Link to="/login">
-              <Button variant="ghost" size="sm" className="font-bold text-slate-700">Login</Button>
-            </Link>
-            <Link to="/signup">
-              <Button variant="secondary" size="sm" className="gap-1.5 shadow-lg shadow-blue-100">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-                Start Free
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/dashboard">
+                <Button variant="secondary" size="sm" className="gap-1.5 shadow-lg shadow-blue-100">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="font-bold text-slate-700">Login</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="secondary" size="sm" className="gap-1.5 shadow-lg shadow-blue-100">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                    Start Free
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ── Mobile right side ── */}
