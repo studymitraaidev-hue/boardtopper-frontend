@@ -587,7 +587,7 @@ export default function Settings() {
                     </span>
                     <p className="text-sm text-slate-600 mt-2">
                       Your Pro access renews on{' '}
-                      {new Date(subscriptionStatus.subscription.endsAt).toLocaleDateString('en-IN', {
+                      {new Date(subscriptionStatus?.subscription?.endsAt).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
@@ -698,5 +698,6 @@ export default function Settings() {
     </AppLayout>
   );
 }
+
 
 
