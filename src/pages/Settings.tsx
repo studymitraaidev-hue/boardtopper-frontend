@@ -227,10 +227,10 @@ export default function Settings() {
   // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const languages = [
-    { id: 'english', label: 'ðŸ‡¬ðŸ‡§ English' },
-    { id: 'marathi', label: 'ðŸ‡®ðŸ‡³ Marathi' },
-    { id: 'hindi',   label: 'ðŸ‡®ðŸ‡³ Hindi'   },
-    { id: 'semi',    label: 'ðŸ”¤ Semi-English' },
+    { id: 'english', label: 'English' },
+    { id: 'marathi', label: 'Marathi' },
+    { id: 'hindi',   label: 'Hindi' },
+    { id: 'semi',    label: 'Semi-English' },
   ];
 
   const targetOptions = [
