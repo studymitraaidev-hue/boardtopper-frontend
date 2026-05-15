@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+﻿import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthProvider from './context/AuthContext';
 import ProtectedRoute from './components/router/ProtectedRoute';
@@ -20,6 +20,7 @@ const AuthCallback      = lazy(() => import('./pages/AuthCallback'));
 const EmergencyModePage = lazy(() => import('./pages/EmergencyMode'));
 const MyNotes           = lazy(() => import('./pages/MyNotes'));
 const Settings          = lazy(() => import('./pages/Settings'));
+const LikelyQuestions  = lazy(() => import('./pages/LikelyQuestions'));
 const VerifyEmail       = lazy(() => import('./pages/VerifyEmail'));
 
 // Policy pages
@@ -49,7 +50,7 @@ function App() {
               <Route path="/auth/callback"   element={<AuthCallback />} />
               <Route path="/pricing"         element={<PricingPage />} />
 
-              {/* Policy pages — public, no auth required */}
+              {/* Policy pages â€” public, no auth required */}
               <Route path="/privacy"         element={<PrivacyPolicy />} />
               <Route path="/terms"           element={<TermsOfService />} />
               <Route path="/refund"          element={<RefundPolicy />} />
@@ -65,6 +66,7 @@ function App() {
                 <Route path="/emergency"    element={<EmergencyModePage />} />
                 <Route path="/my-notes"     element={<MyNotes />} />
                 <Route path="/settings"     element={<Settings />} />
+                <Route path="/likely-questions" element={<LikelyQuestions />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
@@ -77,3 +79,5 @@ function App() {
 }
 
 export default App;
+
+

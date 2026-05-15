@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import {
@@ -6,10 +6,11 @@ import {
   MessageCircle,
   BookOpen,
   Trophy,
+  Zap,
   Settings,
 } from 'lucide-react';
 
-// ─── Tab definitions ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Tab definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const TABS = [
   {
@@ -37,6 +38,12 @@ const TABS = [
     match:  ['/simulation'],
   },
   {
+    label:  'Top Qs',
+    to:     '/likely-questions',
+    icon:   Zap,
+    match:  ['/likely-questions'],
+  },
+  {
     label:  'Settings',
     to:     '/settings',
     icon:   Settings,
@@ -44,13 +51,13 @@ const TABS = [
   },
 ] as const;
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * BottomNav
  *
  * Persistent bottom navigation bar for mobile screens (< 768px).
- * Hidden on md and above — the sidebar handles navigation there.
+ * Hidden on md and above â€” the sidebar handles navigation there.
  *
  * Fixed to the bottom of the viewport with safe-area padding so it
  * works correctly on iPhones with home indicator bars.
@@ -90,7 +97,7 @@ export function BottomNav() {
                 'relative',
                 // Fill equal space, stack icon + label, center both axes
                 'flex-1 flex flex-col items-center justify-center gap-0.5',
-                // Touch target — full height of nav bar (h-14 = 56px)
+                // Touch target â€” full height of nav bar (h-14 = 56px)
                 'min-h-[56px]',
                 // Smooth colour transition
                 'transition-colors duration-150',
@@ -100,7 +107,7 @@ export function BottomNav() {
                   : 'text-slate-400 hover:text-slate-600 active:text-slate-700',
               )}
             >
-              {/* Icon — filled variant for active, outline for inactive */}
+              {/* Icon â€” filled variant for active, outline for inactive */}
               <Icon
                 size={22}
                 className={cn(
@@ -136,3 +143,6 @@ export function BottomNav() {
 }
 
 export default BottomNav;
+
+
+

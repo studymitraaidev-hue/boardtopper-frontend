@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { name: 'Smart Notes',     icon: FileText,        path: '/notes'         },
   { name: 'My Notes',        icon: BookMarked,      path: '/my-notes'      },
   { name: 'Exam Simulation', icon: ClipboardList,   path: '/simulation'    },
+  { name: 'Likely Questions', icon: TrendingUp,  path: '/likely-questions' },
   { name: 'Emergency Mode',  icon: Zap,             path: '/emergency', special: true },
   { name: 'Settings',        icon: Settings,         path: '/settings'   },
 ];
@@ -99,7 +100,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <TrendingUp size={14} className="text-emerald-400" />
                   <span className="text-xs font-bold text-slate-300">Streak</span>
                 </div>
-                <span className="text-xs font-black text-emerald-400">12 days 🔥</span>
+                <span className="text-xs font-black text-emerald-400">12 days ðŸ”¥</span>
               </div>
               <div className="flex items-center justify-between bg-slate-900/60 rounded-xl px-3 py-2">
                 <div className="flex items-center gap-2">
@@ -124,7 +125,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               </div>
               <p className="text-xs font-semibold text-slate-400 mb-3">Upgrade to unlock unlimited AI, PDF notes & full mock tests.</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-black text-white">₹99/mo</span>
+                <span className="text-sm font-black text-white">â‚¹99/mo</span>
                 <span className="text-[10px] font-black text-blue-400 group-hover:text-blue-300 uppercase tracking-wider flex items-center gap-1">
                   Upgrade <ChevronRight size={10} />
                 </span>
@@ -167,3 +168,4 @@ export const Sidebar = ({ className }: SidebarProps) => {
 };
 
 export default Sidebar;
+
