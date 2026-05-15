@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { useAuth } from '../context/AuthContext';
@@ -12,12 +12,12 @@ import {
   Monitor,
 } from 'lucide-react';
 
-// ─── Shared input styles ─────────────────────────────────────────────────────
+// â”€â”€â”€ Shared input styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const inputClass =
   'w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
-// ─── Section card wrapper ────────────────────────────────────────────────────
+// â”€â”€â”€ Section card wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SectionCard({
   children,
@@ -33,7 +33,7 @@ function SectionCard({
   );
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function Settings() {
   const { user, updateUser, subscriptionStatus, refreshSubscription } = useAuth();
@@ -41,7 +41,7 @@ export default function Settings() {
   // Google OAuth detection
   const isGoogleUser = !!(user?.avatar && user.avatar.includes('googleusercontent.com'));
 
-  // ── Section 1: Profile ────────────────────────────────────────────────────
+  // â”€â”€ Section 1: Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [nameValue, setNameValue] = useState(user?.name ?? '');
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -66,7 +66,7 @@ export default function Settings() {
     }
   }
 
-  // ── Section 2: Exam Setup ─────────────────────────────────────────────────
+  // â”€â”€ Section 2: Exam Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [langValue, setLangValue] = useState<string>(user?.language ?? 'english');
   const [targetValue, setTargetValue] = useState<number>(user?.targetPercent ?? 90);
   const [weakSubjectsValue, setWeakSubjectsValue] = useState<string[]>(user?.weakSubjects ?? []);
@@ -109,7 +109,7 @@ export default function Settings() {
     }
   }
 
-  // ── Section 3: Security ───────────────────────────────────────────────────
+  // â”€â”€ Section 3: Security â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -154,7 +154,7 @@ export default function Settings() {
     }
   }
 
-  // ── Section 4: Subscription ───────────────────────────────────────────────
+  // â”€â”€ Section 4: Subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => { refreshSubscription(); }, []);
 
   const [cancelLoading, setCancelLoading] = useState(false);
@@ -180,7 +180,7 @@ export default function Settings() {
     }
   }
 
-  // ── Section 5: Danger Zone ────────────────────────────────────────────────
+  // â”€â”€ Section 5: Danger Zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteToast, setDeleteToast] = useState(false);
@@ -192,7 +192,7 @@ export default function Settings() {
     setTimeout(() => setDeleteToast(false), 4000);
   }
 
-  // ── Section 4b: Active Sessions (DAY 38) ─────────────────────────────────
+  // â”€â”€ Section 4b: Active Sessions (DAY 38) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [sessions, setSessions] = useState<Array<{
     id: string; deviceName: string; lastSeen: string;
     createdAt: string; expiresAt: string;
@@ -220,17 +220,17 @@ export default function Settings() {
       await api.delete(`/api/auth/sessions/${sessionId}`);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch {
-      // silently ignore — user can retry
+      // silently ignore â€” user can retry
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const languages = [
-    { id: 'english', label: '🇬🇧 English' },
-    { id: 'marathi', label: '🇮🇳 Marathi' },
-    { id: 'hindi',   label: '🇮🇳 Hindi'   },
-    { id: 'semi',    label: '🔤 Semi-English' },
+    { id: 'english', label: 'ðŸ‡¬ðŸ‡§ English' },
+    { id: 'marathi', label: 'ðŸ‡®ðŸ‡³ Marathi' },
+    { id: 'hindi',   label: 'ðŸ‡®ðŸ‡³ Hindi'   },
+    { id: 'semi',    label: 'ðŸ”¤ Semi-English' },
   ];
 
   const targetOptions = [
@@ -258,7 +258,7 @@ export default function Settings() {
 
           <div className="flex flex-col gap-6">
 
-            {/* ── SECTION 1: PROFILE ─────────────────────────────────────── */}
+            {/* â”€â”€ SECTION 1: PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <SectionCard>
               <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                 <User size={18} className="text-blue-600" />
@@ -278,7 +278,7 @@ export default function Settings() {
                   />
                 </div>
 
-                {/* Email — disabled */}
+                {/* Email â€” disabled */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
                   <input
@@ -316,7 +316,7 @@ export default function Settings() {
               </div>
             </SectionCard>
 
-            {/* ── SECTION 2: EXAM SETUP ──────────────────────────────────── */}
+            {/* â”€â”€ SECTION 2: EXAM SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <SectionCard>
               <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                 <Target size={18} className="text-emerald-600" />
@@ -419,7 +419,7 @@ export default function Settings() {
               </div>
             </SectionCard>
 
-            {/* ── SECTION 3: SECURITY ────────────────────────────────────── */}
+            {/* â”€â”€ SECTION 3: SECURITY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <SectionCard>
               <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                 <Shield size={18} className="text-violet-600" />
@@ -429,7 +429,7 @@ export default function Settings() {
                 {isGoogleUser ? (
                   <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
                     <Lock size={16} className="text-slate-400 shrink-0" />
-                    <p className="text-sm text-slate-500">You signed in with Google — no password to change.</p>
+                    <p className="text-sm text-slate-500">You signed in with Google â€” no password to change.</p>
                   </div>
                 ) : (
                   <>
@@ -442,7 +442,7 @@ export default function Settings() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           className={cn(inputClass, 'pr-10')}
-                          placeholder="••••••••"
+                          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                         />
                         <button
                           type="button"
@@ -463,7 +463,7 @@ export default function Settings() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           className={cn(inputClass, 'pr-10')}
-                          placeholder="••••••••"
+                          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                         />
                         <button
                           type="button"
@@ -484,7 +484,7 @@ export default function Settings() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className={cn(inputClass, 'pr-10')}
-                          placeholder="••••••••"
+                          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                         />
                         <button
                           type="button"
@@ -522,7 +522,7 @@ export default function Settings() {
               </div>
             </SectionCard>
 
-            {/* ── SECTION 3b: ACTIVE SESSIONS (DAY 38) ──────────────── */}
+            {/* â”€â”€ SECTION 3b: ACTIVE SESSIONS (DAY 38) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <SectionCard>
               <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                 <Monitor size={18} className="text-blue-600" />
@@ -566,7 +566,7 @@ export default function Settings() {
               </div>
             </SectionCard>
 
-            {/* ── SECTION 4: SUBSCRIPTION ────────────────────────────────── */}
+            {/* â”€â”€ SECTION 4: SUBSCRIPTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <SectionCard>
               <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
                 <Crown size={18} className="text-amber-500" />
@@ -579,11 +579,11 @@ export default function Settings() {
                     <div className="h-4 bg-slate-100 rounded animate-pulse" />
                     <div className="h-4 bg-slate-100 rounded animate-pulse w-2/3" />
                   </div>
-                ) : subscriptionStatus.isPro && subscriptionStatus.subscription ? (
+                ) : (subscriptionStatus.isPro || user?.plan === 'pro') ? (
                   /* Pro user */
                   <div>
                     <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full px-3 py-1 text-xs font-bold">
-                      Topper Pro ✦ Active
+                      Topper Pro âœ¦ Active
                     </span>
                     <p className="text-sm text-slate-600 mt-2">
                       Your Pro access renews on{' '}
@@ -620,14 +620,14 @@ export default function Settings() {
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-slate-600">You are on the Free Plan.</p>
                     <Link to="/pricing">
-                      <Button variant="secondary" size="sm">Upgrade to Pro →</Button>
+                      <Button variant="secondary" size="sm">Upgrade to Pro â†’</Button>
                     </Link>
                   </div>
                 )}
               </div>
             </SectionCard>
 
-            {/* ── SECTION 5: DANGER ZONE ─────────────────────────────────── */}
+            {/* â”€â”€ SECTION 5: DANGER ZONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-red-50 flex items-center gap-3">
                 <Trash2 size={18} className="text-red-500" />
@@ -656,7 +656,7 @@ export default function Settings() {
         </div>{/* end max-w-2xl */}
       </div>{/* end min-h-screen */}
 
-      {/* ── DELETE CONFIRMATION MODAL ───────────────────────────────────── */}
+      {/* â”€â”€ DELETE CONFIRMATION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
@@ -698,4 +698,5 @@ export default function Settings() {
     </AppLayout>
   );
 }
+
 
