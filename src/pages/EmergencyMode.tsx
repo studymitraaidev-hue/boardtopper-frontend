@@ -29,6 +29,12 @@ interface AiTip {
 type EmergencyMode = 'notes' | 'doubts' | 'fallback' | 'empty';
 type LoadState     = 'idle' | 'loading' | 'success' | 'error';
 
+interface ExamContext {
+  examType: 'unit_test' | 'half_yearly' | 'board' | 'other';
+  chapters: string;
+  hoursLeft: number;
+}
+
 interface UserContext {
   examDate:      string | null;
   weakSubjects:  string[];
@@ -274,6 +280,79 @@ function AiTipsSection({ tips }: { tips: AiTip[] }) {
   );
 }
 
+
+// ─── Exam Context Sheet ───────────────────────────────────────────────────────
+// helper outside component to avoid template-literal issues
+function examTypeCls(current: string, val: string) {
+  return current === val
+    ? 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-red-500/20 border-red-500/50 text-red-300'
+    : 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500';
+}
+function hoursCls(current: number, val: number) {
+  return current === val
+    ? 'px-3 py-1.5 rounded-xl border text-xs font-black transition-all bg-red-500/20 border-red-500/50 text-red-300'
+    : 'px-3 py-1.5 rounded-xl border text-xs font-black transition-all bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500';
+}
+
+function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
+  ctx: ExamContext;
+  setCtx: (c: ExamContext) => void;
+  onStart: () => void;
+  onClose: () => void;
+}) {
+  const EXAM_TYPES = [
+    { value: 'unit_test'   as const, label: 'Unit Test',   emoji: '📝' },
+    { value: 'half_yearly' as const, label: 'Half Yearly', emoji: '📅' },
+    { value: 'board'       as const, label: 'Board Exam',  emoji: '🎯' },
+    { value: 'other'       as const, label: 'Other',       emoji: '📖' },
+  ];
+  const HOURS = [2, 6, 12, 24, 48];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div className="relative bg-slate-900 border border-slate-700 w-full max-w-lg rounded-t-3xl z-10 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+        <div className="w-10 h-1 bg-slate-700 rounded-full mx-auto" />
+        <div>
+          <h2 className="text-lg font-black text-white">Tell me about your exam</h2>
+          <p className="text-xs text-slate-400 mt-0.5">I will personalise your emergency plan</p>
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">What type of exam?</p>
+          <div className="grid grid-cols-2 gap-2">
+            {EXAM_TYPES.map(t => (
+              <button key={t.value} onClick={() => setCtx({...ctx, examType: t.value})}
+                className={examTypeCls(ctx.examType, t.value)}>
+                <span className="mr-1.5">{t.emoji}</span>{t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Which chapters? <span className="text-slate-600 normal-case font-normal">(optional)</span></p>
+          <input value={ctx.chapters} onChange={e => setCtx({...ctx, chapters: e.target.value})}
+            placeholder="e.g. Algebra, Heredity, Civics Ch.3"
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">How much time left?</p>
+          <div className="flex gap-2 flex-wrap">
+            {HOURS.map(h => (
+              <button key={h} onClick={() => setCtx({...ctx, hoursLeft: h})}
+                className={hoursCls(ctx.hoursLeft, h)}>
+                {h < 24 ? h + 'h' : (h/24) + 'd'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button onClick={onStart} className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base shadow-lg transition-all">
+          <Zap size={18} className="fill-white" /> Generate My Emergency Plan
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export const EmergencyModePage = () => {
@@ -285,6 +364,10 @@ export const EmergencyModePage = () => {
   const [checked, setChecked]         = useState<Set<number>>(new Set());
   const [focusIndex, setFocusIndex]   = useState<number | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [showContext, setShowContext]   = useState(false);
+  const [examContext, setExamContext]   = useState<ExamContext>({
+    examType: 'board', chapters: '', hoursLeft: 12,
+  });
 
   const countdown = useCountdown(data?.userContext?.examDate ?? null);
 
@@ -292,10 +375,12 @@ export const EmergencyModePage = () => {
     <>
       <ProGate onUpgradeClick={() => setShowUpgradeModal(true)} />
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+      {showContext && <ExamContextSheet ctx={examContext} setCtx={setExamContext} onStart={() => handleStart(examContext)} onClose={() => setShowContext(false)} />}
     </>
   );
 
-  const handleStart = async () => {
+  const handleStart = async (ctx: ExamContext = examContext) => {
+    setShowContext(false);
     setLoadState('loading');
     setData(null);
     setErrorMsg('');
@@ -303,7 +388,8 @@ export const EmergencyModePage = () => {
     setFocusIndex(null);
     setExpandedIdx(null);
     try {
-      const result = await api.get<EmergencyData>('/api/emergency');
+      const params = `?examType=${ctx.examType}&chapters=${encodeURIComponent(ctx.chapters)}&hoursLeft=${ctx.hoursLeft}`;
+      const result = await api.get<EmergencyData>(`/api/emergency${params}`);
       if (!result || typeof result.mode !== 'string' || !Array.isArray(result.items)) {
         setErrorMsg('Invalid response from server. Please try again.');
         setLoadState('error');
@@ -592,14 +678,7 @@ export const EmergencyModePage = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <button
-                    onClick={handleStart}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-red-900/50 transition-all active:scale-95 text-base"
-                  >
-                    <Zap size={18} className="fill-white" />
-                    Start Emergency Mode
-                    <ArrowRight size={16} />
-                  </button>
+                  <button onClick={() => setShowContext(true)} className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-red-900/50 transition-all active:scale-95 text-base"><Zap size={18} className="fill-white" />Start Emergency Mode<ArrowRight size={16} /></button>
 
                   {loadState === 'error' && errorMsg && (
                     <div className="bg-red-900/40 border border-red-500/40 rounded-xl p-3 flex items-start gap-2.5">
@@ -822,3 +901,14 @@ export const EmergencyModePage = () => {
 };
 
 export default EmergencyModePage;
+
+
+
+
+
+
+
+
+
+
+
