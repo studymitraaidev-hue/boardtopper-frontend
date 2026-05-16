@@ -221,7 +221,6 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
         </div>
       </main>
     </AppLayout>
-      {showContext && <ExamContextSheet ctx={examContext} setCtx={setExamContext} onStart={() => handleStart(examContext)} onClose={() => setShowContext(false)} />}
   );
 }
 
