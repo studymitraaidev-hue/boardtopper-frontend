@@ -96,6 +96,121 @@ function useCountdown(examDate: string | null) {
   return left;
 }
 
+
+// flashcard battle mode
+function FlashcardBattle({ items, onExit }) {
+  const [current, setCurrent] = React.useState(0);
+  const [flipped, setFlipped] = React.useState(false);
+  const [gotIt, setGotIt] = React.useState([]);
+  const [again, setAgain] = React.useState([]);
+  const [done, setDone] = React.useState(false);
+  const [streak, setStreak] = React.useState(0);
+
+  const item = items[current];
+  const total = items.length;
+  const progress = Math.round(((gotIt.length + again.length) / total) * 100);
+
+  function handleGotIt() { setGotIt(p => [...p, current]); setStreak(s => s + 1); next(); }
+  function handleAgain() { setAgain(p => [...p, current]); setStreak(0); next(); }
+  function next() {
+    setFlipped(false);
+    if (current + 1 >= total) { setDone(true); }
+    else { setCurrent(c => c + 1); }
+  }
+  function restart() {
+    setCurrent(0); setFlipped(false); setGotIt([]); setAgain([]); setDone(false); setStreak(0);
+  }
+
+  if (done) {
+    const score = Math.round((gotIt.length / total) * 100);
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="space-y-6 max-w-sm w-full">
+          <div className="text-6xl">{score >= 80 ? '🏆' : score >= 60 ? '⚡' : '💪'}</div>
+          <div>
+            <p className="text-3xl font-black text-white">{score}%</p>
+            <p className="text-slate-400 text-sm mt-1">{gotIt.length} got it · {again.length} need review</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-emerald-400 font-bold">Got it</span>
+              <span className="text-white font-black">{gotIt.length}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-red-400 font-bold">Review again</span>
+              <span className="text-white font-black">{again.length}</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={restart} className="flex-1 bg-white/10 text-white font-black py-3 rounded-2xl text-sm">Play Again</button>
+            <button onClick={onExit} className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-3 rounded-2xl text-sm">Exit</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <button onClick={onExit} className="p-1.5 bg-white/10 rounded-lg text-white/60 hover:bg-white/20">
+          <X size={16} />
+        </button>
+        <div className="text-center">
+          <p className="text-xs font-black text-white/60 uppercase tracking-widest">Flashcard Battle</p>
+          {streak >= 3 && <p className="text-xs text-amber-400 font-bold">🔥 {streak} streak!</p>}
+        </div>
+        <span className="text-xs text-white/40 font-bold">{current + 1}/{total}</span>
+      </div>
+      <div className="h-1 bg-white/10">
+        <div className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500" style={{ width: progress + '%' }} />
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-lg space-y-4">
+          {item?.priority === 'high' && (
+            <div className="flex justify-center">
+              <span className="text-xs font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full uppercase tracking-wider">Weak Subject</span>
+            </div>
+          )}
+          <div
+            onClick={() => setFlipped(f => !f)}
+            className="cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 rounded-3xl p-8 min-h-64 flex flex-col items-center justify-center text-center shadow-2xl transition-all active:scale-95"
+          >
+            {!flipped ? (
+              <div className="space-y-4">
+                {item?.tag && <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{item.tag}</span>}
+                <h2 className="text-xl font-black text-white leading-tight">{item?.title}</h2>
+                <p className="text-xs text-slate-500 mt-4">Tap to reveal</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm font-black text-slate-400 uppercase mb-2">Answer</p>
+                <p className="text-base text-white/80 leading-relaxed whitespace-pre-wrap">{item?.content || 'No content available'}</p>
+              </div>
+            )}
+          </div>
+          {!flipped && <p className="text-center text-xs text-slate-600">Tap card to flip</p>}
+          {flipped && (
+            <div className="flex gap-3 mt-2">
+              <button onClick={handleAgain} className="flex-1 bg-red-500/20 border border-red-500/30 text-red-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">
+                🔄 Review Again
+              </button>
+              <button onClick={handleGotIt} className="flex-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">
+                Got it!
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex justify-center gap-1.5 pb-6">
+        {items.map((_, i) => (
+          <div key={i} className={cn('h-1.5 rounded-full transition-all', i === current ? 'bg-red-400 w-5' : gotIt.includes(i) ? 'bg-emerald-500 w-1.5' : again.includes(i) ? 'bg-red-500/50 w-1.5' : 'bg-white/20 w-1.5')} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function UpgradeModal({ onClose }: { onClose: () => void }) {
@@ -365,6 +480,7 @@ export const EmergencyModePage = () => {
   const [focusIndex, setFocusIndex]   = useState<number | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [showContext, setShowContext]   = useState(false);
+  const [showFlashcards, setShowFlashcards] = useState(false);
   const [examContext, setExamContext]   = useState<ExamContext>({
     examType: 'board', chapters: '', hoursLeft: 12,
   });
@@ -434,6 +550,10 @@ export const EmergencyModePage = () => {
   const firstName  = data?.userContext.name.split(' ')[0] ?? 'Topper';
 
   // ── Focus Mode overlay ────────────────────────────────────────────────────
+
+  if (showFlashcards && data && data.items.length > 0) {
+    return <FlashcardBattle items={data.items} onExit={() => setShowFlashcards(false)} />;
+  }
 
   if (focusIndex !== null && data && data.items[focusIndex]) {
     const item   = data.items[focusIndex];
@@ -555,6 +675,14 @@ export const EmergencyModePage = () => {
                   className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
                 >
                   <Maximize2 size={11} /> Focus
+                </button>
+              )}
+              {data.items.length > 0 && (
+                <button
+                  onClick={() => setShowFlashcards(true)}
+                  className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
+                >
+                  Flashcards
                 </button>
               )}
               <button
