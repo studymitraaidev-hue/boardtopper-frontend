@@ -436,27 +436,27 @@ export const NotesGenerator = () => {
                     <button
                       key={ch.id ?? i}
                       onClick={() => {
-                        if (ch.free) {
+                        if ((ch.free || isPro)) {
                           setActiveTab('content');
                           setSelected(ch);
                         }
                       }}
                       className={cn(
                         'w-full text-left flex items-center gap-3 p-3.5 rounded-xl border transition-all group',
-                        selected?.name === ch.name && ch.free
+                        selected?.name === ch.name && (ch.free || isPro)
                           ? 'bg-blue-50 border-blue-300 shadow-sm'
-                          : ch.free
+                          : (ch.free || isPro)
                           ? 'bg-white border-slate-100 hover:border-blue-200 hover:bg-blue-50/40 shadow-sm'
                           : 'bg-white border-dashed border-slate-200 opacity-70 cursor-default'
                       )}
                     >
                       <div className={cn(
                         'p-2 rounded-lg shrink-0 transition-colors',
-                        selected?.name === ch.name && ch.free
+                        selected?.name === ch.name && (ch.free || isPro)
                           ? 'bg-blue-600'
                           : 'bg-slate-100 group-hover:bg-blue-600'
                       )}>
-                        {ch.free
+                        {(ch.free || isPro)
                           ? <BookOpen size={15} className={cn('transition-colors', selected?.name === ch.name ? 'text-white' : 'text-slate-500 group-hover:text-white')} />
                           : <Lock size={15} className="text-slate-400" />}
                       </div>
@@ -471,8 +471,8 @@ export const NotesGenerator = () => {
                           )}
                         </div>
                       </div>
-                      {!ch.free && <Lock size={13} className="text-slate-300 shrink-0" />}
-                      {ch.free && <ChevronRight size={15} className="text-slate-300 group-hover:text-blue-500 shrink-0 transition-colors" />}
+                      {!(ch.free || isPro) && <Lock size={13} className="text-slate-300 shrink-0" />}
+                      {(ch.free || isPro) && <ChevronRight size={15} className="text-slate-300 group-hover:text-blue-500 shrink-0 transition-colors" />}
                     </button>
                   ))}
 
