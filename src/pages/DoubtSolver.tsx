@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Link, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { Button } from '../components/ui/Button';
@@ -256,7 +257,7 @@ export const DoubtSolver = () => {
                     )}
                   >
                     {msg.role === 'ai' ? (
-                      <pre className="whitespace-pre-wrap font-sans text-sm">{msg.text}</pre>
+                      <div className="prose prose-sm max-w-none"><ReactMarkdown>{msg.text}</ReactMarkdown></div>
                     ) : (
                       <p>{msg.text}</p>
                     )}
