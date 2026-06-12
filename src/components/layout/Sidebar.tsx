@@ -1,7 +1,8 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../context/AuthContext';
+import { useDashboard } from '../../hooks/useDashboard';
 import {
   LayoutDashboard, MessageSquare, FileText, ClipboardList,
   Zap, GraduationCap, LogOut, Crown, ChevronRight, TrendingUp, Bell, BookMarked, Settings
@@ -24,6 +25,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const location  = useLocation();
   const navigate  = useNavigate();
   const { user, logout } = useAuth();
+  const { progress } = useDashboard();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
@@ -100,14 +102,14 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <TrendingUp size={14} className="text-emerald-400" />
                   <span className="text-xs font-bold text-slate-300">Streak</span>
                 </div>
-                <span className="text-xs font-black text-emerald-400">12 days ðŸ”¥</span>
+                <span className="text-xs font-black text-emerald-400">{progress.streakCount} days 🔥</span>
               </div>
               <div className="flex items-center justify-between bg-slate-900/60 rounded-xl px-3 py-2">
                 <div className="flex items-center gap-2">
                   <Bell size={14} className="text-blue-400" />
                   <span className="text-xs font-bold text-slate-300">Doubts</span>
                 </div>
-                <span className="text-xs font-black text-blue-400">142 solved</span>
+                <span className="text-xs font-black text-blue-400">{progress.doubtsSolved} solved</span>
               </div>
             </div>
           </>
