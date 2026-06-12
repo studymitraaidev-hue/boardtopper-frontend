@@ -487,7 +487,9 @@ export const NotesGenerator = () => {
                 </div>
 
                 {/* Usage notice */}
+                {!isPro && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                {/* Usage notice */}
                   <div className="flex items-start gap-2.5">
                     <AlertCircle size={14} className="text-amber-600 mt-0.5 shrink-0" />
                     <div>
@@ -504,6 +506,7 @@ export const NotesGenerator = () => {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
 
               {/* Note Viewer */}
