@@ -141,7 +141,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const mappedUser = mapUser(data.user);
     localStorage.setItem('bt_user', JSON.stringify(mappedUser));
     setUser(mappedUser);
-    setSubscriptionStatus({ plan: 'free', isPro: false, subscription: null });
+    await fetchSubscription();
   }
 
   function logout(): void {
