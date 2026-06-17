@@ -178,7 +178,7 @@ export const ExamSimulation = () => {
       const token    = localStorage.getItem('bt_token');
       const BASE_URL = import.meta.env['VITE_API_URL'] ?? 'http://localhost:5000';
       const res = await fetch(
-        `${BASE_URL}/api/quiz/generate?subjectId=${subject.id}&count=10${chapterId ? `&chapterId=${chapterId}` : ``}`,
+        `${BASE_URL}/api/quiz/generate?subjectId=${subject.id}&count=10${chapterId ? ("&chapterId=" + chapterId) : ""}`, 
         { headers: { Authorization: `Bearer ${token ?? ''}` } }
       );
       if (!res.ok) {
