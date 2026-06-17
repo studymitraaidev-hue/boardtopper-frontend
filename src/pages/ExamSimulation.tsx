@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { cn } from '../utils/cn';
 import { useAuth } from '../context/AuthContext';
+import { getChaptersBySubject } from '../services/notesService';
+import { Chapter } from '../types/index';
 import { submitQuizAttempt, getQuizStats, getRecentQuizAttempts, QuizStats, QuizAttemptRecord } from '../services/dashboardService';
 import {
   Timer, FileCheck, ChevronRight, AlertCircle, Play, Trophy,
@@ -88,7 +90,7 @@ interface GeneratedQuestion {
   marks: number;
 }
 
-type QuizPhase = 'idle' | 'loading' | 'active' | 'result' | 'error';
+type QuizPhase = 'idle' | 'selectChapter' | 'loading' | 'active' | 'result' | 'error';
 
 export const ExamSimulation = () => {
   const { isPro } = useAuth();
@@ -105,6 +107,8 @@ export const ExamSimulation = () => {
   const [timeLeft,        setTimeLeft]        = useState(0);
   const [generateError,   setGenerateError]   = useState<string | null>(null);
   const [isSubmitting,    setIsSubmitting]     = useState(false);
+  const [chapters,        setChapters]         = useState<Chapter[]>([]);
+  const [chaptersLoading, setChaptersLoading]  = useState(false);
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
@@ -151,8 +155,22 @@ export const ExamSimulation = () => {
     }, 1000);
     return () => clearInterval(t);
   }, [phase, timeLeft, handleSubmit]);
+  const handleSelectSubject = async (subject: SubjectEntry) => {
+    setSelectedSubject(subject);
+    setChapters([]);
+    setChaptersLoading(true);
+    const result = await getChaptersBySubject(subject.id);
+    setChaptersLoading(false);
+    if (result.error || result.data.length === 0) {
+      handleStartQuiz(subject);
+      return;
+    }
+    setChapters(result.data);
+    setPhase('selectChapter');
+  };
 
-  const handleStartQuiz = async (subject: SubjectEntry) => {
+
+  const handleStartQuiz = async (subject: SubjectEntry, chapterId?: string) => {
     setSelectedSubject(subject);
     setPhase('loading');
     setGenerateError(null);
@@ -160,7 +178,7 @@ export const ExamSimulation = () => {
       const token    = localStorage.getItem('bt_token');
       const BASE_URL = import.meta.env['VITE_API_URL'] ?? 'http://localhost:5000';
       const res = await fetch(
-        `${BASE_URL}/api/quiz/generate?subjectId=${subject.id}&count=10`,
+        `${BASE_URL}/api/quiz/generate?subjectId=${subject.id}&count=10${chapterId ? `&chapterId=${chapterId}` : ``}`,
         { headers: { Authorization: `Bearer ${token ?? ''}` } }
       );
       if (!res.ok) {
@@ -205,6 +223,34 @@ export const ExamSimulation = () => {
   };
 
   if (phase === 'loading') {
+  if (phase === 'selectChapter') {
+    return (
+      <AppLayout>
+        <div className="max-w-2xl mx-auto px-4 py-10">
+          <button onClick={() => setPhase('idle')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6">
+            <ChevronLeft size={16} /> Back to Subjects
+          </button>
+          <h2 className="text-xl font-bold mb-1">{selectedSubject?.name}</h2>
+          <p className="text-gray-500 text-sm mb-6">Choose a chapter or take a mixed test</p>
+          {chaptersLoading ? (
+            <div className="flex justify-center py-12"><Loader2 className="animate-spin" size={28} /></div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <button onClick={() => selectedSubject && handleStartQuiz(selectedSubject)} className="w-full text-left px-5 py-4 rounded-xl border-2 border-indigo-500 bg-indigo-50 hover:bg-indigo-100 font-semibold text-indigo-700">
+                ? Full Subject � Mixed Chapters
+              </button>
+              {chapters.map(ch => (
+                <button key={ch.id} onClick={() => selectedSubject && handleStartQuiz(selectedSubject, ch.id)} className="w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:bg-gray-50 transition">
+                  {ch.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </AppLayout>
+    );
+  }
+
     return (
       <AppLayout>
         <main className="flex-1 min-w-0 overflow-y-auto h-screen page-enter flex items-center justify-center">
@@ -472,7 +518,7 @@ export const ExamSimulation = () => {
                       'bg-white rounded-2xl border transition-all group',
                       canAccess ? 'border-slate-100 hover:border-blue-200 shadow-sm cursor-pointer' : 'border-dashed border-slate-200'
                     )}
-                    onClick={() => canAccess && handleStartQuiz(subject)}
+                    onClick={() => canAccess && handleSelectSubject(subject)}
                   >
                     <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
