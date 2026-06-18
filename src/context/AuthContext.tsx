@@ -1,4 +1,4 @@
-import React, {
+﻿import React, {
   createContext, useContext, useState, useEffect, ReactNode,
 } from 'react';
 import { api } from '../utils/api';
@@ -120,6 +120,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       { email, password }
     );
     api.setToken(data.token);
+    localStorage.setItem('bt_token', data.token);
     if (data.refreshToken) {
       localStorage.setItem('bt_refresh_token', data.refreshToken);
     }
@@ -135,6 +136,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       { name, email, password }
     );
     api.setToken(data.token);
+    localStorage.setItem('bt_token', data.token);
     if (data.refreshToken) {
       localStorage.setItem('bt_refresh_token', data.refreshToken);
     }
@@ -197,3 +199,4 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
