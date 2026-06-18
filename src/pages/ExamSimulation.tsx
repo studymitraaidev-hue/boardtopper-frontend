@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { Button } from '../components/ui/Button';
@@ -18,7 +18,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'algebra',
     name: 'Algebra',
-    emoji: '??',
+    emoji: '📐',
     color: 'from-blue-500 to-blue-600',
     light: 'bg-blue-50',
     text: 'text-blue-700',
@@ -27,7 +27,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'geometry',
     name: 'Geometry',
-    emoji: '??',
+    emoji: '📏',
     color: 'from-violet-500 to-violet-600',
     light: 'bg-violet-50',
     text: 'text-violet-700',
@@ -36,7 +36,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'science1',
     name: 'Science Part 1',
-    emoji: '??',
+    emoji: '🧪',
     color: 'from-emerald-500 to-teal-500',
     light: 'bg-emerald-50',
     text: 'text-emerald-700',
@@ -45,7 +45,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'science2',
     name: 'Science Part 2',
-    emoji: '??',
+    emoji: '🧬',
     color: 'from-green-500 to-green-600',
     light: 'bg-green-50',
     text: 'text-green-700',
@@ -54,7 +54,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'history',
     name: 'History & Pol Sc',
-    emoji: '???',
+    emoji: '🏛️',
     color: 'from-amber-500 to-orange-500',
     light: 'bg-amber-50',
     text: 'text-amber-700',
@@ -63,7 +63,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'geography',
     name: 'Geography',
-    emoji: '??',
+    emoji: '🌍',
     color: 'from-cyan-500 to-sky-500',
     light: 'bg-cyan-50',
     text: 'text-cyan-700',
@@ -72,7 +72,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'english',
     name: 'English',
-    emoji: '??',
+    emoji: '📘',
     color: 'from-rose-500 to-pink-500',
     light: 'bg-rose-50',
     text: 'text-rose-700',
@@ -406,7 +406,7 @@ export const ExamSimulation = () => {
                 {passed ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
                 {passed ? 'Passed' : 'Needs Improvement'}
               </div>
-              {isSubmitting && <p className="text-xs text-slate-400">Saving your score…</p>}
+              {isSubmitting && <p className="text-xs text-slate-400">Saving your scoreâ€¦</p>}
             </div>
 
             <div className="space-y-2">
@@ -473,7 +473,7 @@ export const ExamSimulation = () => {
             <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-4 sm:p-5 shadow-lg shadow-indigo-200">
               <Trophy size={22} className="text-amber-300 mb-3" />
               <p className="text-3xl sm:text-4xl font-black">
-                {statsLoading ? '…' : stats.averageScore !== null ? `${stats.averageScore}%` : '—'}
+                {statsLoading ? 'â€¦' : stats.averageScore !== null ? `${stats.averageScore}%` : 'â€”'}
               </p>
               <p className="text-xs sm:text-sm font-semibold text-indigo-200 mt-1">
                 {stats.averageScore !== null ? 'Mock Score Avg' : 'No tests yet'}
@@ -485,7 +485,7 @@ export const ExamSimulation = () => {
                 <FileCheck size={16} className="text-emerald-500" />
               </div>
               <p className="text-3xl sm:text-4xl font-black text-slate-900">
-                {statsLoading ? '…' : stats.totalAttempts}
+                {statsLoading ? 'â€¦' : stats.totalAttempts}
               </p>
               <p className="text-xs text-slate-500 mt-1.5 font-medium">All time</p>
             </div>
@@ -495,7 +495,7 @@ export const ExamSimulation = () => {
                 <Star size={16} className="text-amber-400" />
               </div>
               <p className="text-3xl sm:text-4xl font-black text-slate-900">
-                {statsLoading ? '…' : stats.bestScore !== null ? `${stats.bestScore}%` : '—'}
+                {statsLoading ? 'â€¦' : stats.bestScore !== null ? `${stats.bestScore}%` : 'â€”'}
               </p>
               <p className="text-xs text-slate-500 mt-1.5 font-medium">
                 {stats.bestScore !== null ? 'Personal best' : 'Take a test'}
@@ -565,7 +565,7 @@ export const ExamSimulation = () => {
                   </div>
                 )}
               </div>
-              {/* Pure SVG bar chart — no external library */}
+              {/* Pure SVG bar chart â€” no external library */}
               <div className="w-full overflow-x-auto">
                 <svg
                   viewBox={`0 0 ${Math.max(recentAttempts.length * 44, 300)} 160`}
@@ -621,7 +621,7 @@ export const ExamSimulation = () => {
                   <div className="w-3 h-3 rounded-sm bg-emerald-500 opacity-85" /> =80% (Great)
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                  <div className="w-3 h-3 rounded-sm bg-blue-500 opacity-85" /> 35–79% (Pass)
+                  <div className="w-3 h-3 rounded-sm bg-blue-500 opacity-85" /> 35â€“79% (Pass)
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
                   <div className="w-3 h-3 rounded-sm bg-red-500 opacity-85" /> &lt;35% (Fail)
@@ -662,3 +662,4 @@ export const ExamSimulation = () => {
 };
 
 export default ExamSimulation;
+
