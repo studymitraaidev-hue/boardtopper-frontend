@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import { Button } from '../components/ui/Button';
@@ -18,7 +18,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'algebra',
     name: 'Algebra',
-    emoji: '📐',
+    emoji: '??',
     color: 'from-blue-500 to-blue-600',
     light: 'bg-blue-50',
     text: 'text-blue-700',
@@ -27,7 +27,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'geometry',
     name: 'Geometry',
-    emoji: '📏',
+    emoji: '??',
     color: 'from-violet-500 to-violet-600',
     light: 'bg-violet-50',
     text: 'text-violet-700',
@@ -36,7 +36,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'science1',
     name: 'Science Part 1',
-    emoji: '⚗️',
+    emoji: '??',
     color: 'from-emerald-500 to-teal-500',
     light: 'bg-emerald-50',
     text: 'text-emerald-700',
@@ -45,7 +45,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'science2',
     name: 'Science Part 2',
-    emoji: '🌿',
+    emoji: '??',
     color: 'from-green-500 to-green-600',
     light: 'bg-green-50',
     text: 'text-green-700',
@@ -54,7 +54,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'history',
     name: 'History & Pol Sc',
-    emoji: '🏛️',
+    emoji: '???',
     color: 'from-amber-500 to-orange-500',
     light: 'bg-amber-50',
     text: 'text-amber-700',
@@ -63,7 +63,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'geography',
     name: 'Geography',
-    emoji: '🌍',
+    emoji: '??',
     color: 'from-cyan-500 to-sky-500',
     light: 'bg-cyan-50',
     text: 'text-cyan-700',
@@ -72,7 +72,7 @@ const SUBJECT_CATALOGUE = [
   {
     id: 'english',
     name: 'English',
-    emoji: '📖',
+    emoji: '??',
     color: 'from-rose-500 to-pink-500',
     light: 'bg-rose-50',
     text: 'text-rose-700',
@@ -117,7 +117,7 @@ export const ExamSimulation = () => {
       getRecentQuizAttempts(10),
     ]);
     setStats(statsRes.data);
-    setRecentAttempts([...attemptsRes.data].reverse()); // oldest → newest for chart
+    setRecentAttempts([...attemptsRes.data].reverse()); // oldest ? newest for chart
     setStatsLoading(false);
   }, []);
 
@@ -222,7 +222,6 @@ export const ExamSimulation = () => {
     return `${m}:${s}`;
   };
 
-  if (phase === 'loading') {
   if (phase === 'selectChapter') {
     return (
       <AppLayout>
@@ -237,7 +236,7 @@ export const ExamSimulation = () => {
           ) : (
             <div className="flex flex-col gap-3">
               <button onClick={() => selectedSubject && handleStartQuiz(selectedSubject)} className="w-full text-left px-5 py-4 rounded-xl border-2 border-indigo-500 bg-indigo-50 hover:bg-indigo-100 font-semibold text-indigo-700">
-                ? Full Subject � Mixed Chapters
+                Full Subject - Mixed Chapters
               </button>
               {chapters.map(ch => (
                 <button key={ch.id} onClick={() => selectedSubject && handleStartQuiz(selectedSubject, ch.id)} className="w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:bg-gray-50 transition">
@@ -251,12 +250,13 @@ export const ExamSimulation = () => {
     );
   }
 
+  if (phase === 'loading') {
     return (
       <AppLayout>
         <main className="flex-1 min-w-0 overflow-y-auto h-screen page-enter flex items-center justify-center">
           <div className="text-center space-y-4">
             <Loader2 className="animate-spin text-blue-500 mx-auto" size={32} />
-            <p className="text-base font-bold text-slate-800">Generating your {selectedSubject?.name} quiz…</p>
+            <p className="text-base font-bold text-slate-800">Generating your {selectedSubject?.name} quiz?</p>
             <p className="text-xs text-slate-400">Tailored to Maharashtra SSC board pattern</p>
           </div>
         </main>
@@ -550,7 +550,7 @@ export const ExamSimulation = () => {
             </div>
           </div>
 
-          {/* ── Score History Chart (Day 35) ────────────────────────── */}
+          {/* -- Score History Chart (Day 35) -------------------------- */}
           {recentAttempts.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
@@ -618,7 +618,7 @@ export const ExamSimulation = () => {
               {/* Legend */}
               <div className="flex items-center gap-4 mt-3 justify-center">
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                  <div className="w-3 h-3 rounded-sm bg-emerald-500 opacity-85" /> ≥80% (Great)
+                  <div className="w-3 h-3 rounded-sm bg-emerald-500 opacity-85" /> =80% (Great)
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
                   <div className="w-3 h-3 rounded-sm bg-blue-500 opacity-85" /> 35–79% (Pass)
