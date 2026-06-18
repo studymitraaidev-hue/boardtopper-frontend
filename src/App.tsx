@@ -1,5 +1,6 @@
-﻿import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import AuthProvider from './context/AuthContext';
 import ProtectedRoute from './components/router/ProtectedRoute';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
@@ -74,6 +75,7 @@ function App() {
           </Suspense>
         </Router>
       </AuthProvider>
+      <Analytics />
     </ErrorBoundary>
   );
 }
