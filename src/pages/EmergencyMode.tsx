@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import AppLayout from '../components/layout/AppLayout';
 import { Button } from '../components/ui/Button';
 import { cn } from '../utils/cn';
@@ -7,9 +8,9 @@ import { useAuth } from '../context/AuthContext';
 import { api, ApiError } from '../utils/api';
 import {
   Zap, AlertTriangle, CheckCircle2, BookOpen, ArrowRight, Crown,
-  FileText, MessageCircle, Library, ChevronRight, X, Clock, Target,
-  Brain, Flame, RefreshCw, CheckCheck, Maximize2, Minimize2,
-  ChevronLeft, AlertCircle, TrendingUp, Star, Sparkles,
+  FileText, MessageCircle, Library, ChevronRight, X, Clock,
+  Flame, RefreshCw, CheckCheck, Maximize2, Minimize2,
+  ChevronLeft, AlertCircle, TrendingUp, Star, Sparkles, Calendar,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -30,9 +31,10 @@ type EmergencyMode = 'notes' | 'doubts' | 'fallback' | 'empty';
 type LoadState     = 'idle' | 'loading' | 'success' | 'error';
 
 interface ExamContext {
-  examType: 'unit_test' | 'half_yearly' | 'board' | 'other';
-  chapters: string;
-  hoursLeft: number;
+  examType:     'unit_test' | 'half_yearly' | 'board' | 'other';
+  chapters:     string;
+  hoursLeft:    number;
+  examDateTime: string;
 }
 
 interface UserContext {
@@ -57,10 +59,10 @@ const MODE_META: Record<EmergencyMode, {
   icon:  React.ComponentType<{ size?: number; className?: string }>;
   color: string; bg: string;
 }> = {
-  notes:    { label: 'Your Notes',        description: 'Your most recently edited personal notes.',   icon: FileText,      color: 'text-blue-600',    bg: 'bg-blue-50'    },
-  doubts:   { label: 'Your Doubts',       description: 'Your recent academic doubt-solver questions.', icon: MessageCircle, color: 'text-violet-600',  bg: 'bg-violet-50'  },
-  fallback: { label: 'Syllabus Chapters', description: 'Key chapters from the syllabus to focus on.',  icon: Library,       color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  empty:    { label: 'No Data',           description: 'Nothing found. Create notes or ask doubts.',   icon: BookOpen,      color: 'text-slate-500',   bg: 'bg-slate-50'   },
+  notes:    { label: 'Your Notes',        description: 'Your most recently edited personal notes.',    icon: FileText,      color: 'text-blue-400',    bg: 'bg-blue-950/40'    },
+  doubts:   { label: 'Your Doubts',       description: 'Your recent academic doubt-solver questions.', icon: MessageCircle, color: 'text-violet-400',  bg: 'bg-violet-950/40'  },
+  fallback: { label: 'Syllabus Chapters', description: 'Key chapters from the syllabus to focus on.', icon: Library,       color: 'text-emerald-400', bg: 'bg-emerald-950/40' },
+  empty:    { label: 'No Data',           description: 'Nothing found. Create notes or ask doubts.',  icon: BookOpen,      color: 'text-slate-400',   bg: 'bg-slate-800/40'   },
 };
 
 const GRADIENT: Record<EmergencyMode, string> = {
@@ -74,10 +76,10 @@ const GRADIENT: Record<EmergencyMode, string> = {
 
 function useCountdown(examDate: string | null) {
   const [left, setLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
-
   useEffect(() => {
-    if (!examDate) return;
+    if (!examDate) { setLeft(null); return; }
     const target = new Date(examDate).getTime();
+    if (isNaN(target)) { setLeft(null); return; }
     const tick = () => {
       const diff = target - Date.now();
       if (diff <= 0) { setLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
@@ -92,30 +94,29 @@ function useCountdown(examDate: string | null) {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [examDate]);
-
   return left;
 }
 
+// ─── FlashcardBattle ──────────────────────────────────────────────────────────
 
-// flashcard battle mode
-function FlashcardBattle({ items, onExit }) {
+function FlashcardBattle({ items, onExit }: { items: EmergencyItem[]; onExit: () => void }) {
   const [current, setCurrent] = React.useState(0);
-  const [flipped, setFlipped] = React.useState(false);
-  const [gotIt, setGotIt] = React.useState([]);
-  const [again, setAgain] = React.useState([]);
-  const [done, setDone] = React.useState(false);
-  const [streak, setStreak] = React.useState(0);
+  const [flipped,  setFlipped]  = React.useState(false);
+  const [gotIt,    setGotIt]    = React.useState<number[]>([]);
+  const [again,    setAgain]    = React.useState<number[]>([]);
+  const [done,     setDone]     = React.useState(false);
+  const [streak,   setStreak]   = React.useState(0);
 
-  const item = items[current];
-  const total = items.length;
+  const item     = items[current];
+  const total    = items.length;
   const progress = Math.round(((gotIt.length + again.length) / total) * 100);
 
   function handleGotIt() { setGotIt(p => [...p, current]); setStreak(s => s + 1); next(); }
-  function handleAgain() { setAgain(p => [...p, current]); setStreak(0); next(); }
+  function handleAgain()  { setAgain(p => [...p, current]); setStreak(0);          next(); }
   function next() {
     setFlipped(false);
-    if (current + 1 >= total) { setDone(true); }
-    else { setCurrent(c => c + 1); }
+    if (current + 1 >= total) setDone(true);
+    else setCurrent(c => c + 1);
   }
   function restart() {
     setCurrent(0); setFlipped(false); setGotIt([]); setAgain([]); setDone(false); setStreak(0);
@@ -125,27 +126,21 @@ function FlashcardBattle({ items, onExit }) {
     const score = Math.round((gotIt.length / total) * 100);
     return (
       <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
-        <div className="space-y-6 max-w-sm w-full">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 max-w-sm w-full">
           <div className="text-6xl">{score >= 80 ? '🏆' : score >= 60 ? '⚡' : '💪'}</div>
           <div>
             <p className="text-3xl font-black text-white">{score}%</p>
             <p className="text-slate-400 text-sm mt-1">{gotIt.length} got it · {again.length} need review</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-emerald-400 font-bold">Got it</span>
-              <span className="text-white font-black">{gotIt.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-red-400 font-bold">Review again</span>
-              <span className="text-white font-black">{again.length}</span>
-            </div>
+            <div className="flex justify-between text-sm"><span className="text-emerald-400 font-bold">Got it</span><span className="text-white font-black">{gotIt.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-red-400 font-bold">Review again</span><span className="text-white font-black">{again.length}</span></div>
           </div>
           <div className="flex gap-3">
             <button onClick={restart} className="flex-1 bg-white/10 text-white font-black py-3 rounded-2xl text-sm">Play Again</button>
             <button onClick={onExit} className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-3 rounded-2xl text-sm">Exit</button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -153,9 +148,7 @@ function FlashcardBattle({ items, onExit }) {
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-        <button onClick={onExit} className="p-1.5 bg-white/10 rounded-lg text-white/60 hover:bg-white/20">
-          <X size={16} />
-        </button>
+        <button onClick={onExit} className="p-1.5 bg-white/10 rounded-lg text-white/60 hover:bg-white/20"><X size={16} /></button>
         <div className="text-center">
           <p className="text-xs font-black text-white/60 uppercase tracking-widest">Flashcard Battle</p>
           {streak >= 3 && <p className="text-xs text-amber-400 font-bold">🔥 {streak} streak!</p>}
@@ -172,9 +165,13 @@ function FlashcardBattle({ items, onExit }) {
               <span className="text-xs font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full uppercase tracking-wider">Weak Subject</span>
             </div>
           )}
-          <div
+          <motion.div
+            key={current}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             onClick={() => setFlipped(f => !f)}
-            className="cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 rounded-3xl p-8 min-h-64 flex flex-col items-center justify-center text-center shadow-2xl transition-all active:scale-95"
+            className="cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 rounded-3xl p-8 min-h-64 flex flex-col items-center justify-center text-center shadow-2xl"
           >
             {!flipped ? (
               <div className="space-y-4">
@@ -188,16 +185,12 @@ function FlashcardBattle({ items, onExit }) {
                 <p className="text-base text-white/80 leading-relaxed whitespace-pre-wrap">{item?.content || 'No content available'}</p>
               </div>
             )}
-          </div>
+          </motion.div>
           {!flipped && <p className="text-center text-xs text-slate-600">Tap card to flip</p>}
           {flipped && (
             <div className="flex gap-3 mt-2">
-              <button onClick={handleAgain} className="flex-1 bg-red-500/20 border border-red-500/30 text-red-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">
-                🔄 Review Again
-              </button>
-              <button onClick={handleGotIt} className="flex-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">
-                Got it!
-              </button>
+              <button onClick={handleAgain} className="flex-1 bg-red-500/20 border border-red-500/30 text-red-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">🔄 Review Again</button>
+              <button onClick={handleGotIt} className="flex-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-black py-4 rounded-2xl text-sm active:scale-95 transition-all">✓ Got it!</button>
             </div>
           )}
         </div>
@@ -211,14 +204,17 @@ function FlashcardBattle({ items, onExit }) {
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── UpgradeModal ─────────────────────────────────────────────────────────────
 
 function UpgradeModal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 40, opacity: 0 }}
         className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl z-10 overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
@@ -234,129 +230,108 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
                 <p className="text-xs text-slate-400 mt-0.5">Emergency Mode + all premium features</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors">
-              <X size={18} />
-            </button>
+            <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors"><X size={18} /></button>
           </div>
-
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-2xl font-black text-white">
-                Rs.99<span className="text-sm font-normal text-slate-400">/mo</span>
-              </p>
+              <p className="text-2xl font-black text-white">Rs.99<span className="text-sm font-normal text-slate-400">/mo</span></p>
               <p className="text-xs text-slate-400 mt-0.5">Cancel anytime</p>
             </div>
-            <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">
-              MOST POPULAR
-            </span>
+            <span className="text-xs font-black text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">MOST POPULAR</span>
           </div>
-
           <div className="space-y-2.5">
             {[
-              { icon: Zap,          text: 'Emergency Mode with Focus + Countdown'    },
-              { icon: Sparkles,     text: 'AI revision tips for your weak subjects'   },
-              { icon: AlertCircle,  text: 'Weak subject prioritisation'               },
-              { icon: MessageCircle,text: 'Unlimited AI doubts'                       },
-              { icon: Crown,        text: 'Priority AI response quality'              },
+              { icon: Zap,          text: 'Emergency Mode with Focus + Countdown'   },
+              { icon: Sparkles,     text: 'AI revision tips for your weak subjects'  },
+              { icon: AlertCircle,  text: 'Weak subject prioritisation'              },
+              { icon: MessageCircle,text: 'Unlimited AI doubts'                      },
+              { icon: Crown,        text: 'Priority AI response quality'             },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
-                <div className="p-1.5 bg-emerald-50 rounded-lg shrink-0">
-                  <Icon size={13} className="text-emerald-600" />
-                </div>
+                <div className="p-1.5 bg-emerald-50 rounded-lg shrink-0"><Icon size={13} className="text-emerald-600" /></div>
                 <p className="text-sm text-slate-700">{text}</p>
               </div>
             ))}
           </div>
-
           <Button variant="gold" fullWidth className="gap-2 justify-center font-black" onClick={() => navigate('/pricing')}>
             <Crown size={14} /> Upgrade to Topper Pro - Rs.99/mo
           </Button>
-          <Link to="/pricing" className="block text-xs text-center text-slate-400 hover:text-slate-600 transition-colors">
-            See full plan details
-          </Link>
+          <Link to="/pricing" className="block text-xs text-center text-slate-400 hover:text-slate-600 transition-colors">See full plan details</Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
 
+// ─── ProGate ──────────────────────────────────────────────────────────────────
+
 function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
   return (
     <AppLayout>
-      <main className="flex-1 min-w-0 overflow-y-auto h-screen">
-        <header className="sticky top-0 z-20 bg-gradient-to-r from-red-600 to-orange-500 px-4 sm:px-6 h-14 sm:h-16 flex items-center shadow-lg shadow-red-200">
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen bg-[#0a0a0f]">
+        <header className="sticky top-0 z-20 bg-gradient-to-r from-red-700 to-orange-600 px-4 sm:px-6 h-14 sm:h-16 flex items-center shadow-lg shadow-red-900/50">
           <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-1.5 rounded-lg">
-              <Zap size={18} className="text-white fill-white" />
-            </div>
+            <div className="bg-white/20 p-1.5 rounded-lg"><Zap size={18} className="text-white fill-white" /></div>
             <h1 className="text-sm sm:text-base font-black text-white">Emergency Mode</h1>
           </div>
         </header>
-
         <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 text-center">
-          <div className="relative bg-white rounded-3xl border border-slate-100 shadow-2xl p-8 max-w-sm w-full space-y-6 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-orange-50/50 pointer-events-none" />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="relative bg-[#111118] border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full space-y-6 overflow-hidden"
+          >
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative">
-              <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-5 rounded-3xl inline-flex mx-auto shadow-xl shadow-amber-200">
+              <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-5 rounded-3xl inline-flex mx-auto shadow-xl shadow-amber-900/50">
                 <Crown size={36} className="text-white" />
               </div>
             </div>
             <div className="relative space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Pro Feature</h2>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                Emergency Mode is exclusive to Topper Pro - your personal exam survival toolkit.
-              </p>
+              <h2 className="text-2xl font-black text-white">Pro Feature</h2>
+              <p className="text-sm text-white/40 leading-relaxed">Emergency Mode is your personal exam survival toolkit — exclusive to Topper Pro.</p>
             </div>
-            <div className="relative space-y-2 text-left bg-slate-50 rounded-2xl p-4">
+            <div className="relative space-y-2 text-left bg-white/5 border border-white/10 rounded-2xl p-4">
               {[
-                'AI generates revision tips for your weak subjects',
+                'AI revision tips for your weak subjects',
                 'Weak subject items shown first',
-                'Exam countdown timer',
-                'Focus Mode - one card at a time',
-                'Only academic doubts - no off-topic noise',
+                'Live exam countdown timer',
+                'Focus Mode — one card at a time',
+                'Flashcard Battle mode',
               ].map(f => (
-                <div key={f} className="flex items-center gap-2.5 text-sm text-slate-700">
+                <div key={f} className="flex items-center gap-2.5 text-sm text-white/60">
                   <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />{f}
                 </div>
               ))}
             </div>
             <div className="relative">
-              <Button
-                variant="gold" fullWidth
-                className="gap-2 justify-center font-black py-3 text-base shadow-lg shadow-amber-200"
-                onClick={onUpgradeClick}
-              >
-                <Crown size={16} /> Upgrade to Topper Pro - Rs.99/mo
+              <Button variant="gold" fullWidth className="gap-2 justify-center font-black py-3 text-base" onClick={onUpgradeClick}>
+                <Crown size={16} /> Upgrade to Topper Pro — Rs.99/mo
               </Button>
-              <Link to="/pricing" className="block text-xs text-slate-400 hover:text-slate-600 transition-colors mt-3">
-                See full plan details
-              </Link>
+              <Link to="/pricing" className="block text-xs text-white/30 hover:text-white/60 transition-colors mt-3">See full plan details</Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
     </AppLayout>
   );
 }
 
-// ─── AI Tips Card ─────────────────────────────────────────────────────────────
+// ─── AiTipsSection ────────────────────────────────────────────────────────────
 
 function AiTipsSection({ tips }: { tips: AiTip[] }) {
   const [expanded, setExpanded] = useState<string | null>(tips[0]?.subject ?? null);
   if (tips.length === 0) return null;
-
   return (
-    <div className="bg-gradient-to-br from-indigo-950 to-slate-900 rounded-2xl overflow-hidden shadow-xl">
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
-        <div className="bg-indigo-500/20 p-2 rounded-xl">
-          <Sparkles size={16} className="text-indigo-400" />
-        </div>
+    <div className="bg-[#0d0d1a] border border-indigo-500/20 rounded-2xl overflow-hidden shadow-xl">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+        <div className="bg-indigo-500/20 p-2 rounded-xl"><Sparkles size={16} className="text-indigo-400" /></div>
         <div>
           <p className="text-sm font-black text-white">AI Revision Tips</p>
-          <p className="text-[10px] text-indigo-300/60 uppercase tracking-wider">Generated for your weak subjects</p>
+          <p className="text-[10px] text-indigo-300/50 uppercase tracking-wider">Generated for your weak subjects</p>
         </div>
       </div>
-
       <div className="divide-y divide-white/5">
         {tips.map(tip => {
           const isOpen = expanded === tip.subject;
@@ -367,26 +342,33 @@ function AiTipsSection({ tips }: { tips: AiTip[] }) {
                 className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-white/5 transition-colors text-left"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full uppercase">
-                    Weak
-                  </span>
+                  <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full uppercase">Weak</span>
                   <span className="text-sm font-bold text-white">{tip.subject}</span>
                 </div>
-                <ChevronRight size={15} className={cn('text-white/30 transition-transform shrink-0', isOpen && 'rotate-90')} />
+                <ChevronRight size={15} className={cn('text-white/20 transition-transform shrink-0', isOpen && 'rotate-90')} />
               </button>
-
-              {isOpen && (
-                <div className="px-5 pb-4 space-y-2.5">
-                  {tip.points.map((point, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="shrink-0 w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center mt-0.5">
-                        <span className="text-[9px] font-black text-indigo-400">{i + 1}</span>
-                      </div>
-                      <p className="text-sm text-white/70 leading-relaxed">{point}</p>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-4 space-y-2.5">
+                      {tip.points.map((point, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="shrink-0 w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center mt-0.5">
+                            <span className="text-[9px] font-black text-indigo-400">{i + 1}</span>
+                          </div>
+                          <p className="text-sm text-white/60 leading-relaxed">{point}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
@@ -395,23 +377,17 @@ function AiTipsSection({ tips }: { tips: AiTip[] }) {
   );
 }
 
+// ─── ExamContextSheet ─────────────────────────────────────────────────────────
 
-// ─── Exam Context Sheet ───────────────────────────────────────────────────────
-// helper outside component to avoid template-literal issues
 function examTypeCls(current: string, val: string) {
   return current === val
     ? 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-red-500/20 border-red-500/50 text-red-300'
-    : 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500';
-}
-function hoursCls(current: number, val: number) {
-  return current === val
-    ? 'px-3 py-1.5 rounded-xl border text-xs font-black transition-all bg-red-500/20 border-red-500/50 text-red-300'
-    : 'px-3 py-1.5 rounded-xl border text-xs font-black transition-all bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500';
+    : 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500';
 }
 
 function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
-  ctx: ExamContext;
-  setCtx: (c: ExamContext) => void;
+  ctx:     ExamContext;
+  setCtx:  (c: ExamContext) => void;
   onStart: () => void;
   onClose: () => void;
 }) {
@@ -421,49 +397,173 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
     { value: 'board'       as const, label: 'Board Exam',  emoji: '🎯' },
     { value: 'other'       as const, label: 'Other',       emoji: '📖' },
   ];
-  const HOURS = [2, 6, 12, 24, 48];
+  const QUICK_HOURS = [2, 6, 12, 24, 48];
+
+  const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  const handleDateTimeChange = (val: string) => {
+    if (!val) { setCtx({ ...ctx, examDateTime: '', hoursLeft: 12 }); return; }
+    const diff  = new Date(val).getTime() - Date.now();
+    const hours = Math.max(1, Math.round(diff / 3600000));
+    setCtx({ ...ctx, examDateTime: val, hoursLeft: hours });
+  };
+
+  const previewHours = ctx.examDateTime
+    ? Math.max(0, Math.round((new Date(ctx.examDateTime).getTime() - Date.now()) / 3600000))
+    : null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative bg-slate-900 border border-slate-700 w-full max-w-lg rounded-t-3xl z-10 p-6 space-y-5" onClick={e => e.stopPropagation()}>
-        <div className="w-10 h-1 bg-slate-700 rounded-full mx-auto" />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+      <motion.div
+        initial={{ y: 60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 60, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+        className="relative bg-[#111118] border border-white/10 w-full max-w-lg rounded-t-3xl z-10 p-6 space-y-5"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto" />
         <div>
-          <h2 className="text-lg font-black text-white">Tell me about your exam</h2>
-          <p className="text-xs text-slate-400 mt-0.5">I will personalise your emergency plan</p>
+          <h2 className="text-lg font-black text-white">Your exam details</h2>
+          <p className="text-xs text-white/40 mt-0.5">I will personalise your emergency plan</p>
         </div>
-        <div className="space-y-1.5">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">What type of exam?</p>
+
+        {/* Datetime picker */}
+        <div className="space-y-2">
+          <p className="text-xs font-black text-white/50 uppercase tracking-wider flex items-center gap-2">
+            <Calendar size={11} /> When is your exam?
+          </p>
+          <input
+            type="datetime-local"
+            min={nowLocal}
+            value={ctx.examDateTime}
+            onChange={e => handleDateTimeChange(e.target.value)}
+            className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500/60 [color-scheme:dark]"
+          />
+          {previewHours !== null && previewHours > 0 && (
+            <p className="text-xs text-red-400 font-bold">
+              ⏰ {previewHours >= 24
+                ? `${Math.floor(previewHours / 24)}d ${previewHours % 24}h remaining`
+                : `${previewHours}h remaining`}
+            </p>
+          )}
+          {!ctx.examDateTime && (
+            <div className="space-y-1.5 pt-1">
+              <p className="text-[10px] text-white/25 uppercase tracking-wider font-bold">Or quick pick</p>
+              <div className="flex gap-2 flex-wrap">
+                {QUICK_HOURS.map(h => (
+                  <button
+                    key={h}
+                    onClick={() => setCtx({ ...ctx, hoursLeft: h, examDateTime: '' })}
+                    className={cn(
+                      'px-3 py-1.5 rounded-xl border text-xs font-black transition-all',
+                      ctx.hoursLeft === h && !ctx.examDateTime
+                        ? 'bg-red-500/20 border-red-500/50 text-red-300'
+                        : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500'
+                    )}
+                  >
+                    {h < 24 ? `${h}h` : `${h / 24}d`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Exam type */}
+        <div className="space-y-2">
+          <p className="text-xs font-black text-white/50 uppercase tracking-wider">Exam type</p>
           <div className="grid grid-cols-2 gap-2">
             {EXAM_TYPES.map(t => (
-              <button key={t.value} onClick={() => setCtx({...ctx, examType: t.value})}
-                className={examTypeCls(ctx.examType, t.value)}>
+              <button key={t.value} onClick={() => setCtx({ ...ctx, examType: t.value })} className={examTypeCls(ctx.examType, t.value)}>
                 <span className="mr-1.5">{t.emoji}</span>{t.label}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Chapters */}
         <div className="space-y-1.5">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Which chapters? <span className="text-slate-600 normal-case font-normal">(optional)</span></p>
-          <input value={ctx.chapters} onChange={e => setCtx({...ctx, chapters: e.target.value})}
+          <p className="text-xs font-black text-white/50 uppercase tracking-wider">
+            Chapters <span className="text-white/20 normal-case font-normal">(optional)</span>
+          </p>
+          <input
+            value={ctx.chapters}
+            onChange={e => setCtx({ ...ctx, chapters: e.target.value })}
             placeholder="e.g. Algebra, Heredity, Civics Ch.3"
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
+            className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
           />
         </div>
-        <div className="space-y-1.5">
-          <p className="text-xs font-black text-slate-400 uppercase tracking-wider">How much time left?</p>
-          <div className="flex gap-2 flex-wrap">
-            {HOURS.map(h => (
-              <button key={h} onClick={() => setCtx({...ctx, hoursLeft: h})}
-                className={hoursCls(ctx.hoursLeft, h)}>
-                {h < 24 ? h + 'h' : (h/24) + 'd'}
-              </button>
-            ))}
-          </div>
-        </div>
-        <button onClick={onStart} className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base shadow-lg transition-all">
+
+        <button
+          onClick={onStart}
+          className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base shadow-lg shadow-red-900/50 transition-all active:scale-[0.98]"
+        >
           <Zap size={18} className="fill-white" /> Generate My Emergency Plan
         </button>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── CountdownHero ────────────────────────────────────────────────────────────
+
+function CountdownHero({ countdown }: { countdown: { days: number; hours: number; minutes: number; seconds: number } }) {
+  const isToday    = countdown.days === 0;
+  const isCritical = isToday && countdown.hours < 3;
+  const urgencyBg  = isCritical
+    ? 'bg-red-950/60 border-red-500/40'
+    : isToday
+    ? 'bg-orange-950/40 border-orange-500/30'
+    : 'bg-slate-900/80 border-slate-700/60';
+
+  return (
+    <div className={cn('rounded-2xl p-5 border transition-all', urgencyBg)}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Clock size={13} className="text-white/30" />
+          <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Time to exam</span>
+        </div>
+        {isToday && (
+          <span className="flex items-center gap-1.5 text-[10px] font-black text-red-300 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse inline-block" />
+            EXAM DAY
+          </span>
+        )}
       </div>
+      <div className="flex items-end gap-4 sm:gap-6">
+        {[
+          { val: countdown.days,    label: 'days', pulse: false },
+          { val: countdown.hours,   label: 'hrs',  pulse: false },
+          { val: countdown.minutes, label: 'min',  pulse: false },
+          { val: countdown.seconds, label: 'sec',  pulse: true  },
+        ].map(({ val, label, pulse }) => (
+          <div key={label} className="text-center">
+            {pulse ? (
+              <motion.p
+                key={val}
+                initial={{ opacity: 0.5, scale: 0.88 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.18 }}
+                className="text-4xl sm:text-5xl font-black text-white font-mono tabular-nums"
+              >
+                {String(val).padStart(2, '0')}
+              </motion.p>
+            ) : (
+              <p className="text-4xl sm:text-5xl font-black text-white font-mono tabular-nums">
+                {String(val).padStart(2, '0')}
+              </p>
+            )}
+            <p className="text-[10px] text-white/25 font-bold mt-1 uppercase tracking-wider">{label}</p>
+          </div>
+        ))}
+      </div>
+      {isCritical && (
+        <p className="text-xs text-red-400/80 font-bold mt-3">Focus on your weakest chapter first.</p>
+      )}
     </div>
   );
 }
@@ -473,27 +573,22 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
 export const EmergencyModePage = () => {
   const { isPro } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [loadState, setLoadState]     = useState<LoadState>('idle');
-  const [data, setData]               = useState<EmergencyData | null>(null);
-  const [errorMsg, setErrorMsg]       = useState('');
-  const [checked, setChecked]         = useState<Set<number>>(new Set());
-  const [focusIndex, setFocusIndex]   = useState<number | null>(null);
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  const [showContext, setShowContext]   = useState(false);
+  const [loadState,    setLoadState]     = useState<LoadState>('idle');
+  const [data,         setData]          = useState<EmergencyData | null>(null);
+  const [errorMsg,     setErrorMsg]      = useState('');
+  const [checked,      setChecked]       = useState<Set<number>>(new Set());
+  const [focusIndex,   setFocusIndex]    = useState<number | null>(null);
+  const [expandedIdx,  setExpandedIdx]   = useState<number | null>(null);
+  const [showContext,  setShowContext]    = useState(false);
   const [showFlashcards, setShowFlashcards] = useState(false);
-  const [examContext, setExamContext]   = useState<ExamContext>({
-    examType: 'board', chapters: '', hoursLeft: 12,
+  const [examContext,  setExamContext]   = useState<ExamContext>({
+    examType: 'board', chapters: '', hoursLeft: 12, examDateTime: '',
   });
 
-  const countdown = useCountdown(data?.userContext?.examDate ?? null);
+  const countdownSource = examContext.examDateTime || (data?.userContext?.examDate ?? null);
+  const countdown = useCountdown(countdownSource);
 
-  if (!isPro) return (
-    <>
-      <ProGate onUpgradeClick={() => setShowUpgradeModal(true)} />
-      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
-      {showContext && <ExamContextSheet ctx={examContext} setCtx={setExamContext} onStart={() => handleStart(examContext)} onClose={() => setShowContext(false)} />}
-    </>
-  );
+  // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleStart = async (ctx: ExamContext = examContext) => {
     setShowContext(false);
@@ -503,8 +598,13 @@ export const EmergencyModePage = () => {
     setChecked(new Set());
     setFocusIndex(null);
     setExpandedIdx(null);
+    let effectiveHours = ctx.hoursLeft;
+    if (ctx.examDateTime) {
+      const diff = new Date(ctx.examDateTime).getTime() - Date.now();
+      effectiveHours = Math.max(1, Math.round(diff / 3600000));
+    }
     try {
-      const params = `?examType=${ctx.examType}&chapters=${encodeURIComponent(ctx.chapters)}&hoursLeft=${ctx.hoursLeft}`;
+      const params = `?examType=${ctx.examType}&chapters=${encodeURIComponent(ctx.chapters)}&hoursLeft=${effectiveHours}`;
       const result = await api.get<EmergencyData>(`/api/emergency${params}`);
       if (!result || typeof result.mode !== 'string' || !Array.isArray(result.items)) {
         setErrorMsg('Invalid response from server. Please try again.');
@@ -540,6 +640,8 @@ export const EmergencyModePage = () => {
 
   const reset = () => { setLoadState('idle'); setData(null); setChecked(new Set()); };
 
+  // ── Derived values ─────────────────────────────────────────────────────────
+
   const meta       = data ? (MODE_META[data.mode] ?? MODE_META.empty) : null;
   const ModeIcon   = meta?.icon ?? BookOpen;
   const totalItems = data?.items.length ?? 0;
@@ -549,7 +651,14 @@ export const EmergencyModePage = () => {
   const highCount  = data?.items.filter(i => i.priority === 'high').length ?? 0;
   const firstName  = data?.userContext.name.split(' ')[0] ?? 'Topper';
 
-  // ── Focus Mode overlay ────────────────────────────────────────────────────
+  // ── Early returns ──────────────────────────────────────────────────────────
+
+  if (!isPro) return (
+    <>
+      <ProGate onUpgradeClick={() => setShowUpgradeModal(true)} />
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+    </>
+  );
 
   if (showFlashcards && data && data.items.length > 0) {
     return <FlashcardBattle items={data.items} onExit={() => setShowFlashcards(false)} />;
@@ -559,40 +668,31 @@ export const EmergencyModePage = () => {
     const item   = data.items[focusIndex];
     const isDone = checked.has(focusIndex);
     const grad   = GRADIENT[data.mode];
-
     return (
-      <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
-        {/* Focus header */}
+      <div className="fixed inset-0 z-50 bg-[#0a0a0f] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="bg-red-500/20 p-1.5 rounded-lg">
-              <Zap size={16} className="text-red-400 fill-red-400" />
-            </div>
-            <span className="text-xs font-black text-white/60 uppercase tracking-widest">Focus Mode</span>
+            <div className="bg-red-500/20 p-1.5 rounded-lg"><Zap size={16} className="text-red-400 fill-red-400" /></div>
+            <span className="text-xs font-black text-white/50 uppercase tracking-widest">Focus Mode</span>
             {item.priority === 'high' && (
-              <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">
-                WEAK SUBJECT
-              </span>
+              <span className="text-[10px] font-black text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">WEAK</span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-white/40">{focusIndex + 1} / {data.items.length}</span>
-            <button
-              onClick={() => setFocusIndex(null)}
-              className="p-1.5 bg-white/10 rounded-lg text-white/60 hover:bg-white/20 transition-colors"
-            >
-              <Minimize2 size={16} />
-            </button>
+            <span className="text-xs text-white/30">{focusIndex + 1}/{data.items.length}</span>
+            <button onClick={() => setFocusIndex(null)} className="p-1.5 bg-white/10 rounded-lg text-white/50 hover:bg-white/20 transition-colors"><Minimize2 size={16} /></button>
           </div>
         </div>
-
-        {/* Focus content */}
         <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 overflow-y-auto">
-          <div className="w-full max-w-lg space-y-5">
+          <motion.div
+            key={focusIndex}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+            className="w-full max-w-lg space-y-5"
+          >
             {item.tag && (
-              <span className="text-xs font-black text-white/40 uppercase tracking-wider bg-white/5 px-3 py-1 rounded-full">
-                {item.tag}
-              </span>
+              <span className="text-xs font-black text-white/30 uppercase tracking-wider bg-white/5 px-3 py-1 rounded-full inline-block">{item.tag}</span>
             )}
             <div className={cn('w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-black text-white bg-gradient-to-br shadow-lg', grad)}>
               {focusIndex + 1}
@@ -600,95 +700,81 @@ export const EmergencyModePage = () => {
             <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">{item.title}</h2>
             {item.content && (
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <p className="text-base text-white/70 leading-relaxed whitespace-pre-wrap">{item.content}</p>
+                <p className="text-base text-white/60 leading-relaxed whitespace-pre-wrap">{item.content}</p>
               </div>
             )}
-            <button
+            <motion.button
               onClick={e => toggleChecked(focusIndex, e)}
+              whileTap={{ scale: 0.9 }}
               className={cn(
-                'flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-sm transition-all',
-                isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
+                'flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-sm transition-colors',
+                isDone ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'
               )}
             >
               <CheckCheck size={16} />
               {isDone ? 'Revised!' : 'Mark as Revised'}
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
-
-        {/* Focus navigation */}
         <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
           <button
             onClick={() => setFocusIndex(Math.max(0, focusIndex - 1))}
             disabled={focusIndex === 0}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-xl text-white/70 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-bold"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-xl text-white/60 hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-sm font-bold"
           >
             <ChevronLeft size={16} /> Prev
           </button>
           <div className="flex gap-1.5">
             {data.items.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setFocusIndex(i)}
-                className={cn('h-2 rounded-full transition-all', i === focusIndex ? 'bg-red-400 w-5' : checked.has(i) ? 'bg-emerald-500 w-2' : 'bg-white/20 w-2')}
-              />
+              <button key={i} onClick={() => setFocusIndex(i)}
+                className={cn('h-2 rounded-full transition-all', i === focusIndex ? 'bg-red-400 w-5' : checked.has(i) ? 'bg-emerald-500 w-2' : 'bg-white/20 w-2')} />
             ))}
           </div>
           <button
             onClick={() => focusIndex < data.items.length - 1 ? setFocusIndex(focusIndex + 1) : setFocusIndex(null)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-xl text-white/70 hover:bg-white/20 transition-all text-sm font-bold"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 rounded-xl text-white/60 hover:bg-white/20 transition-all text-sm font-bold"
           >
             {focusIndex < data.items.length - 1
               ? <><span>Next</span><ChevronRight size={16} /></>
-              : <><span>Done</span><CheckCheck size={16} /></>
-            }
+              : <><span>Done</span><CheckCheck size={16} /></>}
           </button>
         </div>
       </div>
     );
   }
 
-  // ── Main render ───────────────────────────────────────────────────────────
+  // ── Main render ─────────────────────────────────────────────────────────────
 
   return (
     <AppLayout>
-      <main className="flex-1 min-w-0 overflow-y-auto h-screen">
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen bg-[#0a0a0f]">
 
         {/* Header */}
-        <header className="sticky top-0 z-20 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between shadow-xl shadow-red-200/60">
+        <header className="sticky top-0 z-20 bg-gradient-to-r from-red-700 via-red-600 to-orange-600 px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between shadow-xl shadow-red-950/60">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 backdrop-blur-sm p-1.5 rounded-lg border border-white/20">
               <Zap size={18} className="text-white fill-white" />
             </div>
             <div>
               <h1 className="text-sm sm:text-base font-black text-white tracking-tight">Emergency Mode</h1>
-              <p className="text-[9px] text-red-100 uppercase tracking-widest font-bold hidden sm:block">
-                Exam Survival · Real Data · AI Tips
-              </p>
+              <p className="text-[9px] text-red-100/60 uppercase tracking-widest font-bold hidden sm:block">Exam Survival · AI Powered</p>
             </div>
           </div>
           {loadState === 'success' && data && (
             <div className="flex items-center gap-2">
               {data.items.length > 0 && (
-                <button
-                  onClick={() => setFocusIndex(0)}
-                  className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
-                >
+                <button onClick={() => setFocusIndex(0)}
+                  className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/20 hover:bg-white/30 transition-colors">
                   <Maximize2 size={11} /> Focus
                 </button>
               )}
               {data.items.length > 0 && (
-                <button
-                  onClick={() => setShowFlashcards(true)}
-                  className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
-                >
-                  Flashcards
+                <button onClick={() => setShowFlashcards(true)}
+                  className="flex items-center gap-1.5 text-xs font-black text-white bg-white/20 px-3 py-1.5 rounded-full border border-white/20 hover:bg-white/30 transition-colors">
+                  Cards
                 </button>
               )}
-              <button
-                onClick={reset}
-                className="p-1.5 bg-white/20 rounded-lg border border-white/20 text-white hover:bg-white/30 transition-colors"
-              >
+              <button onClick={reset} className="p-1.5 bg-white/20 rounded-lg border border-white/20 text-white hover:bg-white/30 transition-colors">
                 <RefreshCw size={14} />
               </button>
             </div>
@@ -697,164 +783,126 @@ export const EmergencyModePage = () => {
 
         <div className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto pb-24">
 
-          {/* Exam countdown */}
-          {countdown && (
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-4 flex items-center gap-4">
-              <div className="bg-red-500/20 p-2 rounded-xl shrink-0">
-                <Clock size={18} className="text-red-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Exam Countdown</p>
-                <div className="flex items-center gap-3">
-                  {[
-                    { val: countdown.days,    label: 'd' },
-                    { val: countdown.hours,   label: 'h' },
-                    { val: countdown.minutes, label: 'm' },
-                    { val: countdown.seconds, label: 's' },
-                  ].map(({ val, label }) => (
-                    <div key={label} className="text-center">
-                      <p className="text-xl font-black text-white tabular-nums">{String(val).padStart(2, '0')}</p>
-                      <p className="text-[10px] text-slate-500 font-bold">{label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {countdown.days === 0 && (
-                <div className="flex items-center gap-1 bg-red-500/20 border border-red-500/30 rounded-full px-2.5 py-1">
-                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-black text-red-300">TODAY</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Weak subjects alert */}
-          {loadState === 'success' && data && data.userContext.weakSubjects.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-              <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-black text-amber-700 mb-1.5">Weak subjects prioritised first</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {data.userContext.weakSubjects.map(s => (
-                    <span key={s} className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              {highCount > 0 && (
-                <span className="text-xs font-black text-amber-600 shrink-0">{highCount} priority</span>
-              )}
-            </div>
-          )}
-
-          {/* Stats row */}
-          {loadState === 'success' && data && (
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Flame,      label: 'Streak',   value: `${data.userContext.streakCount}d`,   color: 'text-orange-500', bg: 'bg-orange-50'  },
-                { icon: TrendingUp, label: 'Target',   value: `${data.userContext.targetPercent}%`, color: 'text-blue-600',   bg: 'bg-blue-50'    },
-                { icon: Star,       label: 'Revised',  value: `${progress}%`,                       color: 'text-emerald-600',bg: 'bg-emerald-50' },
-              ].map(({ icon: Icon, label, value, color, bg }) => (
-                <div key={label} className={cn('rounded-2xl p-3 text-center space-y-1', bg)}>
-                  <Icon size={16} className={cn('mx-auto', color)} />
-                  <p className="text-xs font-black text-slate-700">{value}</p>
-                  <p className="text-[10px] text-slate-500">{label}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Idle / Error state */}
+          {/* ── Idle / Error ───────────────────────────────────────────────── */}
           {(loadState === 'idle' || loadState === 'error') && (
-            <div className="relative bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="relative rounded-3xl overflow-hidden border border-red-500/20"
+              style={{ background: 'linear-gradient(135deg, #0c0608 0%, #160a0a 50%, #0c0c0f 100%)' }}
+            >
+              <div className="absolute top-0 left-1/3 w-72 h-72 bg-red-600/12 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-48 h-48 bg-orange-600/8 rounded-full blur-3xl pointer-events-none" />
               <div className="relative z-10 p-6 sm:p-8 space-y-6">
-                <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-500/30 rounded-full px-3 py-1 w-fit">
-                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-black text-red-300 uppercase tracking-widest">Exam Mode Active</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block" />
+                  <span className="text-[10px] font-black text-red-400/70 uppercase tracking-widest">Emergency Mode Active</span>
                 </div>
-
-                <div className="space-y-3">
-                  <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-                    Exam in<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
-                      a few hours?
-                    </span>
+                <div>
+                  <h2 className="text-4xl sm:text-5xl font-black text-white leading-none tracking-tight">
+                    Exam in a<br />
+                    <span className="text-red-400">few hours?</span>
                   </h2>
-                  <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
-                    Emergency Mode fetches your actual study data, filters academic doubts only, prioritises weak subjects, and generates AI revision tips — in one tap.
+                  <p className="text-sm text-white/35 mt-4 leading-relaxed max-w-sm">
+                    Pulls your notes and doubts, prioritises weak subjects, generates AI revision tips — in one focused session.
                   </p>
                 </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { icon: FileText,    label: 'Your Notes',  sub: 'Weak first'  },
-                    { icon: Brain,       label: 'AI Doubts',   sub: 'Academic only' },
-                    { icon: Sparkles,    label: 'AI Tips',     sub: 'Per subject' },
-                  ].map(({ icon: Icon, label, sub }) => (
-                    <div key={label} className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center space-y-1.5">
-                      <div className="bg-white/10 p-1.5 rounded-lg inline-flex">
-                        <Icon size={14} className="text-white/70" />
-                      </div>
-                      <p className="text-xs font-bold text-white">{label}</p>
-                      <p className="text-[10px] text-slate-500">{sub}</p>
-                    </div>
+                <div className="flex flex-wrap gap-2">
+                  {['Weak-first ordering', 'AI revision tips', 'Flashcard battle', 'Live countdown'].map(f => (
+                    <span key={f} className="text-[10px] font-bold text-white/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">{f}</span>
                   ))}
                 </div>
-
-                <div className="space-y-3">
-                  <button onClick={() => setShowContext(true)} className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-red-900/50 transition-all active:scale-95 text-base"><Zap size={18} className="fill-white" />Start Emergency Mode<ArrowRight size={16} /></button>
-
-                  {loadState === 'error' && errorMsg && (
-                    <div className="bg-red-900/40 border border-red-500/40 rounded-xl p-3 flex items-start gap-2.5">
-                      <AlertTriangle size={15} className="text-red-400 mt-0.5 shrink-0" />
-                      <p className="text-xs text-red-200">{errorMsg}</p>
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={() => setShowContext(true)}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-red-500 hover:bg-red-400 text-white font-black px-8 py-4 rounded-2xl text-base shadow-2xl shadow-red-900/50 transition-all active:scale-[0.97]"
+                >
+                  <Zap size={18} className="fill-white" />
+                  Start Emergency Session
+                  <ArrowRight size={16} />
+                </button>
+                {loadState === 'error' && errorMsg && (
+                  <div className="bg-red-950/50 border border-red-500/30 rounded-xl p-3 flex items-start gap-2.5">
+                    <AlertTriangle size={15} className="text-red-400 mt-0.5 shrink-0" />
+                    <p className="text-xs text-red-300">{errorMsg}</p>
+                  </div>
+                )}
               </div>
-            </div>
+            </motion.div>
           )}
 
-          {/* Loading state */}
+          {/* ── Loading ────────────────────────────────────────────────────── */}
           {loadState === 'loading' && (
-            <div className="bg-white border border-slate-100 rounded-3xl p-12 flex flex-col items-center gap-5 shadow-sm">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-[#111118] border border-white/10 rounded-3xl p-12 flex flex-col items-center gap-5"
+            >
               <div className="relative">
-                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
-                  <Zap size={28} className="text-red-500 fill-red-500" />
+                <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center">
+                  <Zap size={28} className="text-red-400 fill-red-400" />
                 </div>
                 <div className="absolute -inset-1 border-2 border-red-500/30 rounded-2xl animate-ping" />
               </div>
               <div className="text-center space-y-1">
-                <p className="font-black text-slate-800">Fetching your content...</p>
-                <p className="text-xs text-slate-400">Filtering academic doubts · Generating AI tips</p>
+                <p className="font-black text-white">Fetching your content...</p>
+                <p className="text-xs text-white/30">Filtering academic doubts · Generating AI tips</p>
               </div>
               <div className="flex gap-1.5">
                 {[0, 1, 2].map(i => (
                   <div key={i} className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
 
-          {/* Success state */}
+          {/* ── Success ────────────────────────────────────────────────────── */}
           {loadState === 'success' && data && (
-            <div className="space-y-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+
+              {/* Countdown */}
+              {countdown && <CountdownHero countdown={countdown} />}
+
+              {/* Weak subjects alert */}
+              {data.userContext.weakSubjects.length > 0 && (
+                <div className="bg-amber-950/30 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+                  <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-amber-300 mb-1.5">Weak subjects prioritised first</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.userContext.weakSubjects.map(s => (
+                        <span key={s} className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {highCount > 0 && <span className="text-xs font-black text-amber-400 shrink-0">{highCount} priority</span>}
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon: Flame,      label: 'Streak',  value: `${data.userContext.streakCount}d`,   color: 'text-orange-400', bg: 'bg-orange-950/40 border-orange-500/20'   },
+                  { icon: TrendingUp, label: 'Target',  value: `${data.userContext.targetPercent}%`, color: 'text-blue-400',   bg: 'bg-blue-950/40 border-blue-500/20'       },
+                  { icon: Star,       label: 'Revised', value: `${progress}%`,                       color: 'text-emerald-400',bg: 'bg-emerald-950/40 border-emerald-500/20' },
+                ].map(({ icon: Icon, label, value, color, bg }) => (
+                  <div key={label} className={cn('rounded-2xl p-3 text-center space-y-1 border', bg)}>
+                    <Icon size={16} className={cn('mx-auto', color)} />
+                    <p className="text-sm font-black text-white">{value}</p>
+                    <p className="text-[10px] text-white/30">{label}</p>
+                  </div>
+                ))}
+              </div>
 
               {/* Source badge */}
               {meta && (
-                <div className={cn('rounded-2xl p-4 flex items-center gap-4', meta.bg)}>
-                  <div className={cn('p-2.5 rounded-xl', meta.bg)}>
+                <div className={cn('rounded-2xl p-4 flex items-center gap-4 border border-white/10', meta.bg)}>
+                  <div className={cn('p-2.5 rounded-xl border border-white/10', meta.bg)}>
                     <ModeIcon size={18} className={meta.color} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={cn('text-xs font-black uppercase tracking-wider mb-0.5', meta.color)}>
-                      Source: {meta.label}
-                    </p>
-                    <p className="text-sm text-slate-600">{meta.description}</p>
+                    <p className={cn('text-xs font-black uppercase tracking-wider mb-0.5', meta.color)}>Source: {meta.label}</p>
+                    <p className="text-sm text-white/40">{meta.description}</p>
                   </div>
                 </div>
               )}
@@ -864,180 +912,173 @@ export const EmergencyModePage = () => {
 
               {/* Empty state */}
               {(data.mode === 'empty' || data.items.length === 0) ? (
-                <div className="bg-white border border-slate-100 rounded-3xl p-10 flex flex-col items-center gap-4 text-center shadow-sm">
-                  <BookOpen size={32} className="text-slate-300" />
+                <div className="bg-[#111118] border border-white/10 rounded-3xl p-10 flex flex-col items-center gap-4 text-center">
+                  <BookOpen size={32} className="text-white/20" />
                   <div>
-                    <p className="font-bold text-slate-700 mb-1">Nothing to show yet</p>
-                    <p className="text-sm text-slate-500">Create notes or ask doubts first, then come back.</p>
+                    <p className="font-bold text-white/60 mb-1">Nothing to show yet</p>
+                    <p className="text-sm text-white/30">Create notes or ask doubts first, then come back.</p>
                   </div>
                   <div className="flex gap-3 flex-wrap justify-center">
-                    <Link to="/my-notes">
-                      <Button variant="secondary" className="gap-1.5 text-sm">
-                        <FileText size={14} /> Write Notes
-                      </Button>
-                    </Link>
-                    <Link to="/doubt-solver">
-                      <Button variant="secondary" className="gap-1.5 text-sm">
-                        <MessageCircle size={14} /> Ask a Doubt
-                      </Button>
-                    </Link>
+                    <Link to="/my-notes"><Button variant="secondary" className="gap-1.5 text-sm"><FileText size={14} /> Write Notes</Button></Link>
+                    <Link to="/doubt-solver"><Button variant="secondary" className="gap-1.5 text-sm"><MessageCircle size={14} /> Ask a Doubt</Button></Link>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
 
-                  {/* Progress tracker */}
-                  <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-2">
+                  {/* Progress bar */}
+                  <div className="bg-[#111118] border border-white/10 rounded-2xl p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Flame size={15} className="text-red-500" />
-                        <span className="font-extrabold text-slate-900 text-sm">
-                          {doneCount}/{totalItems} revised
-                        </span>
+                        <Flame size={15} className="text-red-400" />
+                        <span className="font-extrabold text-white text-sm">{doneCount}/{totalItems} revised</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {allDone && (
-                          <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                            All done!
-                          </span>
+                          <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">All done!</span>
                         )}
-                        <button
-                          onClick={() => setFocusIndex(0)}
-                          className="flex items-center gap-1.5 text-xs font-black text-red-600 bg-red-50 px-3 py-1.5 rounded-xl hover:bg-red-100 transition-colors"
-                        >
+                        <button onClick={() => setFocusIndex(0)}
+                          className="flex items-center gap-1.5 text-xs font-black text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-colors">
                           <Maximize2 size={12} /> Focus Mode
                         </button>
                       </div>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className={cn('h-full rounded-full transition-all duration-500', allDone ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500')}
-                        style={{ width: `${progress}%` }}
+                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        className={cn('h-full rounded-full', allDone ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500')}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
                       />
                     </div>
-                    <p className="text-xs text-slate-400">
-                      Tap to expand · Check off when revised · Focus Mode for distraction-free review
-                    </p>
+                    <p className="text-xs text-white/20">Tap to expand · check off when revised · Focus Mode for deep review</p>
                   </div>
 
-                  {/* Item list */}
-                  {data.items.map((item, i) => {
-                    const isDone     = checked.has(i);
-                    const isExpanded = expandedIdx === i;
-                    const isHigh     = item.priority === 'high';
-
-                    return (
-                      <div
-                        key={i}
-                        onClick={() => setExpandedIdx(isExpanded ? null : i)}
-                        className={cn(
-                          'bg-white border rounded-2xl overflow-hidden transition-all shadow-sm cursor-pointer select-none',
-                          isDone   ? 'border-emerald-200 bg-emerald-50/30' :
-                          isHigh   ? 'border-amber-200' :
-                          isExpanded ? 'border-red-200 shadow-md' :
-                          'border-slate-100 hover:border-slate-200'
-                        )}
-                      >
-                        <div className="p-4 sm:p-5 flex items-start gap-3">
-                          <div className={cn(
-                            'shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-sm bg-gradient-to-br',
-                            isDone ? 'from-emerald-400 to-emerald-500' : GRADIENT[data.mode]
-                          )}>
-                            {isDone ? <CheckCheck size={14} /> : i + 1}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                              {isHigh && (
-                                <span className="text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                                  Weak Subject
-                                </span>
-                              )}
-                              {item.tag && !isHigh && (
-                                <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded-full">
-                                  {item.tag}
-                                </span>
-                              )}
+                  {/* Item list with stagger */}
+                  <motion.div
+                    className="space-y-3"
+                    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } }}
+                    initial="hidden"
+                    animate="show"
+                  >
+                    {data.items.map((item, i) => {
+                      const isDone     = checked.has(i);
+                      const isExpanded = expandedIdx === i;
+                      const isHigh     = item.priority === 'high';
+                      return (
+                        <motion.div
+                          key={i}
+                          variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 340, damping: 28 } } }}
+                          onClick={() => setExpandedIdx(isExpanded ? null : i)}
+                          className={cn(
+                            'rounded-2xl overflow-hidden border transition-all cursor-pointer',
+                            isDone     ? 'border-emerald-500/20 bg-emerald-950/20' :
+                            isHigh     ? 'border-amber-500/20 bg-[#111118]' :
+                            isExpanded ? 'border-red-500/20 bg-[#0f0f18]' :
+                            'border-white/5 bg-[#111118] hover:border-white/10'
+                          )}
+                        >
+                          <div className="p-4 sm:p-5 flex items-start gap-3">
+                            <div className={cn(
+                              'shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white bg-gradient-to-br shadow-lg',
+                              isDone ? 'from-emerald-500 to-emerald-600' : GRADIENT[data.mode]
+                            )}>
+                              {isDone ? <CheckCheck size={14} /> : i + 1}
                             </div>
-                            <p className={cn('font-extrabold text-sm leading-snug break-words', isDone ? 'text-slate-400 line-through' : 'text-slate-900')}>
-                              {item.title}
-                            </p>
-                            {item.content && !isExpanded && (
-                              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{item.content}</p>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={e => toggleChecked(i, e)}
-                              className={cn(
-                                'p-1.5 rounded-lg transition-all',
-                                isDone
-                                  ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
-                                  : 'bg-slate-100 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600'
-                              )}
-                            >
-                              <CheckCheck size={14} />
-                            </button>
-                            <ChevronRight size={15} className={cn('text-slate-300 transition-transform', isExpanded && 'rotate-90')} />
-                          </div>
-                        </div>
-
-                        {isExpanded && item.content && (
-                          <div className="px-4 sm:px-5 pb-4">
-                            <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">
-                                {item.content}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                {isHigh && (
+                                  <span className="text-[9px] font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Weak Subject</span>
+                                )}
+                                {item.tag && !isHigh && (
+                                  <span className="text-[9px] font-bold text-white/20 bg-white/5 px-1.5 py-0.5 rounded-full">{item.tag}</span>
+                                )}
+                              </div>
+                              <p className={cn('font-extrabold text-sm leading-snug break-words', isDone ? 'text-white/25 line-through' : 'text-white')}>
+                                {item.title}
                               </p>
+                              {item.content && !isExpanded && (
+                                <p className="text-xs text-white/25 mt-1 line-clamp-1">{item.content}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <motion.button
+                                onClick={e => toggleChecked(i, e)}
+                                whileTap={{ scale: 0.78 }}
+                                className={cn(
+                                  'p-1.5 rounded-lg transition-colors',
+                                  isDone ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-white/25 hover:bg-emerald-500/10 hover:text-emerald-400'
+                                )}
+                              >
+                                <CheckCheck size={14} />
+                              </motion.button>
+                              <ChevronRight size={15} className={cn('text-white/15 transition-transform', isExpanded && 'rotate-90')} />
                             </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          <AnimatePresence>
+                            {isExpanded && item.content && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 sm:px-5 pb-4">
+                                  <div className="bg-white/5 border border-white/5 rounded-xl p-3">
+                                    <p className="text-sm text-white/50 leading-relaxed whitespace-pre-wrap break-words">{item.content}</p>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
+
+                  {/* Footer CTA */}
+                  <div className="bg-[#0d0d14] border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4">
+                    <div className="flex-1 text-center sm:text-left">
+                      <h3 className="font-extrabold text-white mb-1 text-sm">
+                        {allDone ? `All revised, ${firstName}. You are ready.` : `You have got this, ${firstName}.`}
+                      </h3>
+                      <p className="text-xs text-white/30">Need help? Ask a doubt or run a quick mock test.</p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Link to="/doubt-solver" className="flex-1 sm:flex-none">
+                        <Button variant="secondary" fullWidth className="gap-1.5 text-xs justify-center bg-blue-600 hover:bg-blue-700 text-white border-0">
+                          Ask Doubt <ArrowRight size={12} />
+                        </Button>
+                      </Link>
+                      <Link to="/simulation" className="flex-1 sm:flex-none">
+                        <Button variant="secondary" fullWidth className="gap-1.5 text-xs justify-center bg-white/5 hover:bg-white/10 text-white border border-white/10">
+                          Mock Test <ChevronRight size={12} />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+
                 </div>
               )}
-
-              {/* Footer CTA */}
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="font-extrabold text-white mb-1 text-sm">
-                    {allDone ? `All revised, ${firstName}. You are ready!` : `You have got this, ${firstName}.`}
-                  </h3>
-                  <p className="text-xs text-slate-400">Need more help? Ask a doubt or run a quick mock test.</p>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <Link to="/doubt-solver" className="flex-1 sm:flex-none">
-                    <Button variant="secondary" fullWidth className="gap-1.5 text-xs justify-center bg-blue-600 hover:bg-blue-700 text-white border-0">
-                      Ask Doubt <ArrowRight size={12} />
-                    </Button>
-                  </Link>
-                  <Link to="/simulation" className="flex-1 sm:flex-none">
-                    <Button variant="secondary" fullWidth className="gap-1.5 text-xs justify-center bg-white/10 hover:bg-white/20 text-white border border-white/20">
-                      Mock Test <ChevronRight size={12} />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-            </div>
+            </motion.div>
           )}
+
         </div>
       </main>
-      {showContext && <ExamContextSheet ctx={examContext} setCtx={setExamContext} onStart={() => handleStart(examContext)} onClose={() => setShowContext(false)} />}
+
+      <AnimatePresence>
+        {showContext && (
+          <ExamContextSheet
+            ctx={examContext}
+            setCtx={setExamContext}
+            onStart={() => handleStart(examContext)}
+            onClose={() => setShowContext(false)}
+          />
+        )}
+      </AnimatePresence>
     </AppLayout>
   );
 };
 
 export default EmergencyModePage;
-
-
-
-
-
-
-
-
-
-
-
