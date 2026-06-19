@@ -392,20 +392,34 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
   onClose: () => void;
 }) {
   const EXAM_TYPES = [
-    { value: 'unit_test'   as const, label: 'Unit Test',   emoji: '📝' },
-    { value: 'half_yearly' as const, label: 'Half Yearly', emoji: '📅' },
-    { value: 'board'       as const, label: 'Board Exam',  emoji: '🎯' },
-    { value: 'other'       as const, label: 'Other',       emoji: '📖' },
+    { value: 'unit_test'   as const, label: 'Unit Test',   emoji: '📝', hint: 'Quick rescue for one unit' },
+    { value: 'half_yearly' as const, label: 'Half Yearly', emoji: '📅', hint: 'A few chapters to revise' },
+    { value: 'board'       as const, label: 'Board Exam',  emoji: '🎯', hint: 'Full, high-stakes revision' },
+    { value: 'other'       as const, label: 'Other',       emoji: '📖', hint: 'Custom exam plan' },
   ];
-  const QUICK_HOURS = [2, 6, 12, 24, 48];
+
+  const QUICK_HOURS = [
+    { hours: 2,  label: '2h',  note: 'Crash rescue' },
+    { hours: 6,  label: '6h',  note: 'Tonight focus' },
+    { hours: 12, label: '12h', note: 'Most common' },
+    { hours: 24, label: 'Tomorrow', note: 'One full day' },
+    { hours: 48, label: '2 days', note: 'More breathing room' },
+  ];
+
+  const QUICK_CHAPTERS = ['Algebra', 'Science Part 1', 'History & Pol Sc', 'Geography'];
+
+  const [step, setStep] = useState(0);
 
   const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
     .toISOString()
     .slice(0, 16);
 
   const handleDateTimeChange = (val: string) => {
-    if (!val) { setCtx({ ...ctx, examDateTime: '', hoursLeft: 12 }); return; }
-    const diff  = new Date(val).getTime() - Date.now();
+    if (!val) {
+      setCtx({ ...ctx, examDateTime: '', hoursLeft: 12 });
+      return;
+    }
+    const diff = new Date(val).getTime() - Date.now();
     const hours = Math.max(1, Math.round(diff / 3600000));
     setCtx({ ...ctx, examDateTime: val, hoursLeft: hours });
   };
@@ -413,6 +427,39 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
   const previewHours = ctx.examDateTime
     ? Math.max(0, Math.round((new Date(ctx.examDateTime).getTime() - Date.now()) / 3600000))
     : null;
+
+  const examTypeMeta = EXAM_TYPES.find(t => t.value === ctx.examType) ?? EXAM_TYPES[2];
+  const selectedTimingLabel = ctx.examDateTime
+    ? `On ${new Date(ctx.examDateTime).toLocaleString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      })}`
+    : ctx.hoursLeft < 24
+    ? `In ${ctx.hoursLeft} hours`
+    : ctx.hoursLeft === 24
+    ? 'Tomorrow'
+    : `${Math.round(ctx.hoursLeft / 24)} days away`;
+
+  const selectedFocusLabel = ctx.chapters.trim() || 'No chapter added yet';
+
+  const steps = [
+    { title: 'When is the exam?', subtitle: 'Start with the timing so we can make the plan realistic.' },
+    { title: 'What kind of exam is it?', subtitle: 'We will tune the rescue plan to the right level.' },
+    { title: 'What should we focus on?', subtitle: 'Add chapters or topics and build the final plan.' },
+  ];
+
+  const progress = ((step + 1) / steps.length) * 100;
+  const isFinalStep = step === steps.length - 1;
+
+  const goNext = () => setStep(s => Math.min(steps.length - 1, s + 1));
+  const goBack = () => setStep(s => Math.max(0, s - 1));
+
+  const timingPreset = (hours: number) => {
+    setCtx({ ...ctx, hoursLeft: hours, examDateTime: '' });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
@@ -422,88 +469,272 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative bg-[#111118] border border-white/10 w-full max-w-lg rounded-t-3xl z-10 p-6 space-y-5"
+        className="relative bg-[#111118] border border-white/10 w-full max-w-lg rounded-t-3xl z-10 p-6 space-y-5 max-h-[92vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto" />
-        <div>
-          <h2 className="text-lg font-black text-white">Your exam details</h2>
-          <p className="text-xs text-white/40 mt-0.5">I will personalise your emergency plan</p>
-        </div>
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto" />
 
-        {/* Datetime picker */}
-        <div className="space-y-2">
-          <p className="text-xs font-black text-white/50 uppercase tracking-wider flex items-center gap-2">
-            <Calendar size={11} /> When is your exam?
-          </p>
-          <input
-            type="datetime-local"
-            min={nowLocal}
-            value={ctx.examDateTime}
-            onChange={e => handleDateTimeChange(e.target.value)}
-            className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500/60 [color-scheme:dark]"
-          />
-          {previewHours !== null && previewHours > 0 && (
-            <p className="text-xs text-red-400 font-bold">
-              ⏰ {previewHours >= 24
-                ? `${Math.floor(previewHours / 24)}d ${previewHours % 24}h remaining`
-                : `${previewHours}h remaining`}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black text-red-400/70 uppercase tracking-[0.28em]">
+              Build your rescue plan
             </p>
-          )}
-          {!ctx.examDateTime && (
-            <div className="space-y-1.5 pt-1">
-              <p className="text-[10px] text-white/25 uppercase tracking-wider font-bold">Or quick pick</p>
-              <div className="flex gap-2 flex-wrap">
-                {QUICK_HOURS.map(h => (
-                  <button
-                    key={h}
-                    onClick={() => setCtx({ ...ctx, hoursLeft: h, examDateTime: '' })}
-                    className={cn(
-                      'px-3 py-1.5 rounded-xl border text-xs font-black transition-all',
-                      ctx.hoursLeft === h && !ctx.examDateTime
-                        ? 'bg-red-500/20 border-red-500/50 text-red-300'
-                        : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500'
-                    )}
-                  >
-                    {h < 24 ? `${h}h` : `${h / 24}d`}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+            <h2 className="text-lg sm:text-xl font-black text-white mt-1">
+              {steps[step].title}
+            </h2>
+            <p className="text-xs sm:text-sm text-white/40 mt-1 leading-relaxed">
+              {steps[step].subtitle}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 p-2 rounded-xl hover:bg-white/5 text-white/50 hover:text-white transition-colors"
+            aria-label="Close emergency plan"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {/* Exam type */}
         <div className="space-y-2">
-          <p className="text-xs font-black text-white/50 uppercase tracking-wider">Exam type</p>
-          <div className="grid grid-cols-2 gap-2">
-            {EXAM_TYPES.map(t => (
-              <button key={t.value} onClick={() => setCtx({ ...ctx, examType: t.value })} className={examTypeCls(ctx.examType, t.value)}>
-                <span className="mr-1.5">{t.emoji}</span>{t.label}
-              </button>
-            ))}
+          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.25em] text-white/25">
+            <span>Step {step + 1}</span>
+            <span>{steps.length} total</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
 
-        {/* Chapters */}
-        <div className="space-y-1.5">
-          <p className="text-xs font-black text-white/50 uppercase tracking-wider">
-            Chapters <span className="text-white/20 normal-case font-normal">(optional)</span>
-          </p>
-          <input
-            value={ctx.chapters}
-            onChange={e => setCtx({ ...ctx, chapters: e.target.value })}
-            placeholder="e.g. Algebra, Heredity, Civics Ch.3"
-            className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider font-black">Timing</p>
+            <p className="text-sm text-white font-bold mt-1 leading-snug">{selectedTimingLabel}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider font-black">Exam type</p>
+            <p className="text-sm text-white font-bold mt-1 leading-snug">{examTypeMeta.label}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider font-black">Focus</p>
+            <p className="text-sm text-white font-bold mt-1 leading-snug line-clamp-2">{selectedFocusLabel}</p>
+          </div>
         </div>
 
-        <button
-          onClick={onStart}
-          className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base shadow-lg shadow-red-900/50 transition-all active:scale-[0.98]"
-        >
-          <Zap size={18} className="fill-white" /> Generate My Emergency Plan
-        </button>
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div
+              key="timing-step"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.18 }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <p className="text-xs font-black text-white/50 uppercase tracking-wider flex items-center gap-2">
+                  <Calendar size={11} /> Pick a quick timing
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {QUICK_HOURS.map(option => {
+                    const selected = ctx.examDateTime === '' && ctx.hoursLeft === option.hours;
+                    return (
+                      <button
+                        key={option.label}
+                        onClick={() => timingPreset(option.hours)}
+                        className={cn(
+                          'rounded-2xl border px-3 py-3 text-left transition-all',
+                          selected
+                            ? 'bg-red-500/20 border-red-500/40 shadow-lg shadow-red-950/20'
+                            : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={cn('text-sm font-black', selected ? 'text-red-200' : 'text-white')}>
+                            {option.label}
+                          </span>
+                          {selected && <CheckCircle2 size={14} className="text-red-300 shrink-0" />}
+                        </div>
+                        <p className={cn('text-[10px] mt-1.5 font-medium', selected ? 'text-red-200/75' : 'text-slate-400')}>
+                          {option.note}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-black text-white/50 uppercase tracking-wider">
+                    Prefer exact date & time?
+                  </p>
+                  {ctx.examDateTime && (
+                    <button
+                      onClick={() => setCtx({ ...ctx, examDateTime: '', hoursLeft: 12 })}
+                      className="text-[10px] font-black uppercase tracking-wider text-red-300 hover:text-red-200 transition-colors"
+                    >
+                      Use quick timing
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="datetime-local"
+                  min={nowLocal}
+                  value={ctx.examDateTime}
+                  onChange={e => handleDateTimeChange(e.target.value)}
+                  className="w-full bg-slate-800/60 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500/60 [color-scheme:dark]"
+                />
+                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <div className="mt-0.5">
+                    <Clock size={14} className="text-red-400" />
+                  </div>
+                  <p className="text-sm text-white/70 leading-relaxed">
+                    {ctx.examDateTime
+                      ? previewHours !== null && previewHours > 0
+                        ? `Great — we will plan around this exact time. ${previewHours >= 24
+                            ? `${Math.floor(previewHours / 24)}d ${previewHours % 24}h left.`
+                            : `${previewHours}h left.`}`
+                        : 'This time is in the past or very close. Pick a future time.'
+                      : 'Quick timings are best for fast exam rescue. Exact time is optional.'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 1 && (
+            <motion.div
+              key="type-step"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.18 }}
+              className="space-y-3"
+            >
+              <p className="text-xs font-black text-white/50 uppercase tracking-wider">
+                Tap the closest match
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {EXAM_TYPES.map(t => {
+                  const selected = ctx.examType === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => setCtx({ ...ctx, examType: t.value })}
+                      className={cn(
+                        'rounded-2xl border px-4 py-4 text-left transition-all',
+                        selected
+                          ? 'bg-red-500/20 border-red-500/40 shadow-lg shadow-red-950/20'
+                          : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{t.emoji}</span>
+                            <span className={cn('text-sm font-black', selected ? 'text-red-200' : 'text-white')}>
+                              {t.label}
+                            </span>
+                          </div>
+                          <p className={cn('text-xs mt-2 leading-relaxed', selected ? 'text-red-200/70' : 'text-slate-400')}>
+                            {t.hint}
+                          </p>
+                        </div>
+                        {selected && <CheckCircle2 size={16} className="text-red-300 shrink-0 mt-0.5" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="focus-step"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.18 }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <p className="text-xs font-black text-white/50 uppercase tracking-wider">
+                  What should we focus on?
+                </p>
+                <input
+                  value={ctx.chapters}
+                  onChange={e => setCtx({ ...ctx, chapters: e.target.value })}
+                  placeholder="Try: Algebra, Science Part 2, Civics Ch.3"
+                  className="w-full bg-slate-800/60 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
+                />
+                <p className="text-xs text-white/35 leading-relaxed">
+                  Add one subject, one chapter, or a full set of topics. We will turn it into a clear rescue plan.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.25em]">
+                  Quick examples
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_CHAPTERS.map(chapter => (
+                    <button
+                      key={chapter}
+                      onClick={() => setCtx({ ...ctx, chapters: chapter })}
+                      className={cn(
+                        'px-3 py-2 rounded-full border text-xs font-bold transition-all',
+                        ctx.chapters.trim() === chapter
+                          ? 'bg-red-500/20 border-red-500/40 text-red-200'
+                          : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                      )}
+                    >
+                      {chapter}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                <p className="text-xs font-black text-white/50 uppercase tracking-wider">
+                  Rescue plan preview
+                </p>
+                <div className="space-y-2 text-sm text-white/70">
+                  <p>• Exam: <span className="text-white font-bold">{examTypeMeta.label}</span></p>
+                  <p>• Timing: <span className="text-white font-bold">{selectedTimingLabel}</span></p>
+                  <p>• Focus: <span className="text-white font-bold">{selectedFocusLabel}</span></p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex gap-3 pt-1">
+          <button
+            onClick={step === 0 ? onClose : goBack}
+            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-sm font-black text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            {step === 0 ? 'Cancel' : 'Back'}
+          </button>
+          {!isFinalStep ? (
+            <button
+              onClick={goNext}
+              className="flex-1 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-red-900/40 hover:opacity-95 transition-opacity"
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              onClick={onStart}
+              className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-lg shadow-red-900/50 transition-all active:scale-[0.98]"
+            >
+              <Zap size={16} className="fill-white" /> Build My Rescue Plan
+            </button>
+          )}
+        </div>
       </motion.div>
     </div>
   );
