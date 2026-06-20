@@ -959,6 +959,11 @@ export const EmergencyModePage = () => {
               <button onClick={reset} className="p-1.5 bg-white/20 rounded-lg border border-white/20 text-white hover:bg-white/30 transition-colors">
                 <RefreshCw size={14} />
               </button>
+              <button
+                onClick={() => { updateProfile({ examDate: null }).catch(() => {}); reset(); }}
+                className="flex items-center gap-1.5 text-xs font-black text-red-200 bg-black/30 px-3 py-1.5 rounded-full border border-red-400/30 hover:bg-black/50 transition-colors">
+                <X size={11} /> End Session
+              </button>
             </div>
           )}
         </header>
