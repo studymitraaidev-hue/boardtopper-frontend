@@ -7,7 +7,7 @@ import { cn } from '../utils/cn';
 import { useAuth } from '../context/AuthContext';
 import { getChaptersBySubject } from '../services/notesService';
 import { Chapter } from '../types/index';
-import { submitQuizAttempt, getQuizStats, getRecentQuizAttempts, QuizStats, QuizAttemptRecord } from '../services/dashboardService';
+import { submitQuizAttempt, completeChapter, getQuizStats, getRecentQuizAttempts, QuizStats, QuizAttemptRecord } from '../services/dashboardService';
 import {
   Timer, FileCheck, ChevronRight, AlertCircle, Play, Trophy,
   BarChart2, Target, Zap, Lock, CheckCircle2, XCircle,
@@ -109,6 +109,7 @@ export const ExamSimulation = () => {
   const [isSubmitting,    setIsSubmitting]     = useState(false);
   const [chapters,        setChapters]         = useState<Chapter[]>([]);
   const [chaptersLoading, setChaptersLoading]  = useState(false);
+  const [selectedChapterId, setSelectedChapterId] = useState<string | undefined>(undefined);
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
@@ -131,6 +132,9 @@ export const ExamSimulation = () => {
     try {
       if (selectedSubject) {
         await submitQuizAttempt({ subjectId: selectedSubject.id, score, totalQ: questions.length });
+        if (selectedChapterId) {
+          await completeChapter({ subjectId: selectedSubject.id, chapterId: selectedChapterId, score });
+        }
       }
     } catch {
       // Non-fatal
@@ -139,7 +143,7 @@ export const ExamSimulation = () => {
       setPhase('result');
       loadStats();
     }
-  }, [phase, answers, questions, selectedSubject, loadStats]);
+  }, [phase, answers, questions, selectedSubject, selectedChapterId, loadStats]);
 
   useEffect(() => {
     if (phase !== 'active' || timeLeft <= 0) return;
@@ -172,6 +176,7 @@ export const ExamSimulation = () => {
 
   const handleStartQuiz = async (subject: SubjectEntry, chapterId?: string) => {
     setSelectedSubject(subject);
+    setSelectedChapterId(chapterId);
     setPhase('loading');
     setGenerateError(null);
     try {
@@ -662,4 +667,9 @@ export const ExamSimulation = () => {
 };
 
 export default ExamSimulation;
+
+
+
+
+
 

@@ -1,7 +1,7 @@
-import { api } from '../utils/api';
+﻿import { api } from '../utils/api';
 import { Subject, ScheduleItem, RecentNote, ApiResponse } from '../types/index';
 
-// ─── Dashboard Intelligence (Day 5) ───────────────────────────────────────────
+// â”€â”€â”€ Dashboard Intelligence (Day 5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface DashboardData {
   totalNotes: number;
@@ -38,7 +38,7 @@ export async function getDashboardData(): Promise<ApiResponse<DashboardData>> {
   }
 }
 
-// ─── Existing helpers (kept unchanged) ────────────────────────────────────────
+// â”€â”€â”€ Existing helpers (kept unchanged) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface ProgressStats {
   totalCompleted: number;
@@ -144,5 +144,19 @@ export async function getProgressStats(): Promise<ApiResponse<ProgressStats>> {
       data: { totalCompleted: 0, streakCount: 0, bySubject: {}, mockScoreAvg: null, doubtsSolved: 0 },
       error: err instanceof Error ? err.message : 'Failed to load progress.',
     };
+  }
+}
+
+
+export async function completeChapter(payload: {
+  subjectId: string;
+  chapterId: string;
+  score?: number;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await api.post('/api/progress/chapter-done', payload);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Failed to mark chapter complete' };
   }
 }

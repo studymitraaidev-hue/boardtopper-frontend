@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AppLayout from '../components/layout/AppLayout';
@@ -13,7 +13,7 @@ import {
   ChevronLeft, AlertCircle, TrendingUp, Star, Sparkles, Calendar,
 } from 'lucide-react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface EmergencyItem {
   title:     string;
@@ -38,11 +38,14 @@ interface ExamContext {
 }
 
 interface UserContext {
-  examDate:      string | null;
-  weakSubjects:  string[];
-  streakCount:   number;
+  examDate: string | null;
+  weakSubjects: string[];
+  streakCount: number;
   targetPercent: number;
-  name:          string;
+  name: string;
+  timeRemainingMinutes: number | null;
+  urgencyLevel: 'unknown' | 'low' | 'medium' | 'high' | 'panic';
+  prioritySubjects: string[];
 }
 
 interface EmergencyData {
@@ -52,7 +55,7 @@ interface EmergencyData {
   userContext: UserContext;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MODE_META: Record<EmergencyMode, {
   label: string; description: string;
@@ -72,7 +75,7 @@ const GRADIENT: Record<EmergencyMode, string> = {
   empty:    'from-slate-400 to-slate-500',
 };
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function useCountdown(examDate: string | null) {
   const [left, setLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
@@ -155,7 +158,7 @@ function UpgradeModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── ProGate ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ ProGate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
   return (
@@ -182,14 +185,14 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
             </div>
             <div className="relative space-y-2">
               <h2 className="text-2xl font-black text-white">Pro Feature</h2>
-              <p className="text-sm text-white/40 leading-relaxed">Emergency Mode is your personal exam survival toolkit — exclusive to Topper Pro.</p>
+              <p className="text-sm text-white/40 leading-relaxed">Emergency Mode is your personal exam survival toolkit â€” exclusive to Topper Pro.</p>
             </div>
             <div className="relative space-y-2 text-left bg-white/5 border border-white/10 rounded-2xl p-4">
               {[
                 'AI revision tips for your weak subjects',
                 'Weak subject items shown first',
                 'Live exam countdown timer',
-                'Focused Revision — one card at a time',
+                'Focused Revision â€” one card at a time',
                 ].map(f => (
                 <div key={f} className="flex items-center gap-2.5 text-sm text-white/60">
                   <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />{f}
@@ -198,7 +201,7 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
             </div>
             <div className="relative">
               <Button variant="gold" fullWidth className="gap-2 justify-center font-black py-3 text-base" onClick={onUpgradeClick}>
-                <Crown size={16} /> Upgrade to Topper Pro — Rs.99/mo
+                <Crown size={16} /> Upgrade to Topper Pro â€” Rs.99/mo
               </Button>
               <Link to="/pricing" className="block text-xs text-white/30 hover:text-white/60 transition-colors mt-3">See full plan details</Link>
             </div>
@@ -209,7 +212,7 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
   );
 }
 
-// ─── AiTipsSection ────────────────────────────────────────────────────────────
+// â”€â”€â”€ AiTipsSection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function AiTipsSection({ tips }: { tips: AiTip[] }) {
   const [expanded, setExpanded] = useState<string | null>(tips[0]?.subject ?? null);
@@ -268,7 +271,7 @@ function AiTipsSection({ tips }: { tips: AiTip[] }) {
   );
 }
 
-// ─── ExamContextSheet ─────────────────────────────────────────────────────────
+// â”€â”€â”€ ExamContextSheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function examTypeCls(current: string, val: string) {
   return current === val
@@ -283,10 +286,10 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
   onClose: () => void;
 }) {
   const EXAM_TYPES = [
-    { value: 'unit_test'   as const, label: 'Unit Test',   emoji: '📝', hint: 'Quick rescue for one unit' },
-    { value: 'half_yearly' as const, label: 'Half Yearly', emoji: '📅', hint: 'A few chapters to revise' },
-    { value: 'board'       as const, label: 'Board Exam',  emoji: '🎯', hint: 'Full, high-stakes revision' },
-    { value: 'other'       as const, label: 'Other',       emoji: '📖', hint: 'Custom exam plan' },
+    { value: 'unit_test'   as const, label: 'Unit Test',   emoji: 'ðŸ“', hint: 'Quick rescue for one unit' },
+    { value: 'half_yearly' as const, label: 'Half Yearly', emoji: 'ðŸ“…', hint: 'A few chapters to revise' },
+    { value: 'board'       as const, label: 'Board Exam',  emoji: 'ðŸŽ¯', hint: 'Full, high-stakes revision' },
+    { value: 'other'       as const, label: 'Other',       emoji: 'ðŸ“–', hint: 'Custom exam plan' },
   ];
 
   const QUICK_HOURS = [
@@ -297,7 +300,14 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
     { hours: 48, label: '2 days', note: 'More breathing room' },
   ];
 
-  const QUICK_CHAPTERS = ['Algebra', 'Science Part 1', 'History & Pol Sc', 'Geography'];
+  const QUICK_CHAPTERS = [
+  '🔥 Most Important Topics',
+  '⚡ Last Minute Revision',
+  '🎯 Weak Chapters',
+  '📝 PYQs Focus',
+  '📚 Full Syllabus',
+  '🚀 Score Booster Topics'
+];
 
   const [step, setStep] = useState(0);
 
@@ -334,7 +344,22 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
     ? 'Tomorrow'
     : `${Math.round(ctx.hoursLeft / 24)} days away`;
 
-  const selectedFocusLabel = ctx.chapters.trim() || 'No chapter added yet';
+  const focusTopics = ctx.chapters.split(',').map(t => t.trim()).filter(Boolean);
+const selectedFocusLabel =
+  focusTopics.length === 0
+    ? 'No chapter added yet'
+    : focusTopics.length === 1
+    ? focusTopics[0]
+    : focusTopics.length + ' Topics Selected';
+
+const strategyTip =
+  ctx.hoursLeft <= 2
+    ? '⚡ PYQ Blitz: Focus only on previous year questions, formulas and definitions.'
+    : ctx.hoursLeft <= 6
+    ? '🔥 High-Weightage Rescue: Revise only important topics and frequently asked concepts.'
+    : ctx.hoursLeft <= 12
+    ? '📚 Smart Revision: Cover all selected chapters once and revise weak points.'
+    : '🎯 Full Recovery Plan: Complete syllabus coverage, revision and practice questions.';
 
   const steps = [
     { title: 'When is the exam?', subtitle: 'Start with the timing so we can make the plan realistic.' },
@@ -485,15 +510,17 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
                   <p className="text-sm text-white/70 leading-relaxed">
                     {ctx.examDateTime
                       ? previewHours !== null && previewHours > 0
-                        ? `Great — we will plan around this exact time. ${previewHours >= 24
+                        ? `Great â€” we will plan around this exact time. ${previewHours >= 24
                             ? `${Math.floor(previewHours / 24)}d ${previewHours % 24}h left.`
                             : `${previewHours}h left.`}`
                         : 'This time is in the past or very close. Pick a future time.'
                       : 'Quick timings are best for fast exam rescue. Exact time is optional.'}
                   </p>
                 </div>
-              </div>
-            </motion.div>
+
+
+</div>
+</motion.div>
           )}
 
           {step === 1 && (
@@ -556,12 +583,13 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
                 <p className="text-xs font-black text-white/50 uppercase tracking-wider">
                   What should we focus on?
                 </p>
-                <input
-                  value={ctx.chapters}
-                  onChange={e => setCtx({ ...ctx, chapters: e.target.value })}
-                  placeholder="Try: Algebra, Science Part 2, Civics Ch.3"
-                  className="w-full bg-slate-800/60 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-red-500/50"
-                />
+                <textarea
+  value={ctx.chapters}
+  onChange={e => setCtx({ ...ctx, chapters: e.target.value })}
+  rows={3}
+  placeholder="Enter subjects, chapters or important topics..."
+  className="w-full resize-none bg-slate-800/60 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+/>
                 <p className="text-xs text-white/35 leading-relaxed">
                   Add one subject, one chapter, or a full set of topics. We will turn it into a clear rescue plan.
                 </p>
@@ -575,7 +603,7 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
                   {QUICK_CHAPTERS.map(chapter => (
                     <button
                       key={chapter}
-                      onClick={() => setCtx({ ...ctx, chapters: chapter })}
+                      onClick={() => setCtx({ ...ctx, chapters: ctx.chapters.trim() ? ctx.chapters + ", " + chapter : chapter })}
                       className={cn(
                         'px-3 py-2 rounded-full border text-xs font-bold transition-all',
                         ctx.chapters.trim() === chapter
@@ -598,8 +626,18 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
                   <p>• Timing: <span className="text-white font-bold">{selectedTimingLabel}</span></p>
                   <p>• Focus: <span className="text-white font-bold">{selectedFocusLabel}</span></p>
                 </div>
-              </div>
-            </motion.div>
+
+<div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+  <p className="text-[10px] font-black uppercase tracking-wider text-amber-300 mb-1">
+    AI Strategy
+  </p>
+  <p className="text-sm text-amber-100 leading-relaxed">
+    {strategyTip}
+  </p>
+</div>
+
+</div>
+</motion.div>
           )}
         </AnimatePresence>
 
@@ -631,7 +669,7 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
   );
 }
 
-// ─── CountdownHero ────────────────────────────────────────────────────────────
+// â”€â”€â”€ CountdownHero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CountdownHero({ countdown }: { countdown: { days: number; hours: number; minutes: number; seconds: number } }) {
   const isToday    = countdown.days === 0;
@@ -690,7 +728,7 @@ function CountdownHero({ countdown }: { countdown: { days: number; hours: number
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const EmergencyModePage = () => {
   const { isPro } = useAuth();
@@ -709,7 +747,7 @@ export const EmergencyModePage = () => {
   const countdownSource = examContext.examDateTime || (data?.userContext?.examDate ?? null);
   const countdown = useCountdown(countdownSource);
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleStart = async (ctx: ExamContext = examContext) => {
     setShowContext(false);
@@ -761,7 +799,7 @@ export const EmergencyModePage = () => {
 
   const reset = () => { setLoadState('idle'); setData(null); setChecked(new Set()); };
 
-  // ── Derived values ─────────────────────────────────────────────────────────
+  // â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const meta       = data ? (MODE_META[data.mode] ?? MODE_META.empty) : null;
   const ModeIcon   = meta?.icon ?? BookOpen;
@@ -771,8 +809,11 @@ export const EmergencyModePage = () => {
   const allDone    = totalItems > 0 && doneCount === totalItems;
   const highCount  = data?.items.filter(i => i.priority === 'high').length ?? 0;
   const firstName  = data?.userContext.name.split(' ')[0] ?? 'Topper';
+  const urgencyLevel = data?.userContext.urgencyLevel ?? 'unknown';
+  const prioritySubjects = data?.userContext.prioritySubjects ?? [];
+  const urgencyColor = urgencyLevel === 'panic' ? 'text-red-400' : urgencyLevel === 'high' ? 'text-orange-400' : urgencyLevel === 'medium' ? 'text-yellow-400' : 'text-green-400';
 
-  // ── Early returns ──────────────────────────────────────────────────────────
+  // â”€â”€ Early returns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (!isPro) return (
     <>
@@ -860,7 +901,7 @@ export const EmergencyModePage = () => {
     );
   }
 
-  // ── Main render ─────────────────────────────────────────────────────────────
+  // â”€â”€ Main render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
     <AppLayout>
@@ -874,7 +915,7 @@ export const EmergencyModePage = () => {
             </div>
             <div>
               <h1 className="text-sm sm:text-base font-black text-white tracking-tight">Emergency Mode</h1>
-              <p className="text-[9px] text-red-100/60 uppercase tracking-widest font-bold hidden sm:block">Exam Survival · AI Powered</p>
+              <p className="text-[9px] text-red-100/60 uppercase tracking-widest font-bold hidden sm:block">Exam Survival Â· AI Powered</p>
             </div>
           </div>
           {loadState === 'success' && data && (
@@ -895,7 +936,7 @@ export const EmergencyModePage = () => {
 
         <div className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto pb-24">
 
-          {/* ── Idle / Error ───────────────────────────────────────────────── */}
+          {/* â”€â”€ Idle / Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {(loadState === 'idle' || loadState === 'error') && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -917,7 +958,7 @@ export const EmergencyModePage = () => {
                     <span className="text-red-400">few hours?</span>
                   </h2>
                   <p className="text-sm text-white/35 mt-4 leading-relaxed max-w-sm">
-                    Pulls your notes and doubts, prioritises weak subjects, generates AI revision tips — in one focused session.
+                    Pulls your notes and doubts, prioritises weak subjects, generates AI revision tips â€” in one focused session.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -943,7 +984,7 @@ export const EmergencyModePage = () => {
             </motion.div>
           )}
 
-          {/* ── Loading ────────────────────────────────────────────────────── */}
+          {/* â”€â”€ Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {loadState === 'loading' && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -958,7 +999,7 @@ export const EmergencyModePage = () => {
               </div>
               <div className="text-center space-y-1">
                 <p className="font-black text-white">Fetching your content...</p>
-                <p className="text-xs text-white/30">Filtering academic doubts · Generating AI tips</p>
+                <p className="text-xs text-white/30">Filtering academic doubts Â· Generating AI tips</p>
               </div>
               <div className="flex gap-1.5">
                 {[0, 1, 2].map(i => (
@@ -968,45 +1009,37 @@ export const EmergencyModePage = () => {
             </motion.div>
           )}
 
-          {/* ── Success ────────────────────────────────────────────────────── */}
+          {/* â”€â”€ Success â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {loadState === 'success' && data && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
 
               {/* Countdown */}
               {countdown && <CountdownHero countdown={countdown} />}
 
-              {/* Weak subjects alert */}
-              {data.userContext.weakSubjects.length > 0 && (
-                <div className="bg-amber-950/30 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
-                  <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-amber-300 mb-1.5">Weak subjects prioritised first</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {data.userContext.weakSubjects.map(s => (
-                        <span key={s} className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {highCount > 0 && <span className="text-xs font-black text-amber-400 shrink-0">{highCount} priority</span>}
+                            {/* Emergency Summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-red-500/20 bg-red-950/30 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-red-300/80">Urgency</p>
+                  <p className="mt-2 text-lg font-black text-white capitalize">{urgencyLevel}</p>
+                  <p className="text-xs text-white/35 mt-1">Personalized by your exam date</p>
                 </div>
-              )}
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { icon: Flame,      label: 'Streak',  value: `${data.userContext.streakCount}d`,   color: 'text-orange-400', bg: 'bg-orange-950/40 border-orange-500/20'   },
-                  { icon: TrendingUp, label: 'Target',  value: `${data.userContext.targetPercent}%`, color: 'text-blue-400',   bg: 'bg-blue-950/40 border-blue-500/20'       },
-                  { icon: Star,       label: 'Revised', value: `${progress}%`,                       color: 'text-emerald-400',bg: 'bg-emerald-950/40 border-emerald-500/20' },
-                ].map(({ icon: Icon, label, value, color, bg }) => (
-                  <div key={label} className={cn('rounded-2xl p-3 text-center space-y-1 border', bg)}>
-                    <Icon size={16} className={cn('mx-auto', color)} />
-                    <p className="text-sm font-black text-white">{value}</p>
-                    <p className="text-[10px] text-white/30">{label}</p>
-                  </div>
-                ))}
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Time Left</p>
+                  <p className="mt-2 text-lg font-black text-white">
+                    {data.userContext.timeRemainingMinutes === null ? 'Set exam date' : `${data.userContext.timeRemainingMinutes} min`}
+                  </p>
+                  <p className="text-xs text-white/35 mt-1">Live from your saved exam date</p>
+                </div>
+                <div className="rounded-2xl border border-amber-500/20 bg-amber-950/30 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-300/80">Priority Subjects</p>
+                  <p className="mt-2 text-lg font-black text-white">
+                    {prioritySubjects.length > 0 ? prioritySubjects.slice(0, 3).join(', ') : 'No weak subjects yet'}
+                  </p>
+                  <p className="text-xs text-white/35 mt-1">Top subjects to revise first</p>
+                </div>
               </div>
 
-              {/* Source badge */}
+              {/* Stats */}
               {meta && (
                 <div className={cn('rounded-2xl p-4 flex items-center gap-4 border border-white/10', meta.bg)}>
                   <div className={cn('p-2.5 rounded-xl border border-white/10', meta.bg)}>
@@ -1063,7 +1096,7 @@ export const EmergencyModePage = () => {
                         transition={{ duration: 0.6, ease: 'easeOut' }}
                       />
                     </div>
-                    <p className="text-xs text-white/20">Tap to expand · check off when revised · Focused Revision for deep review</p>
+                    <p className="text-xs text-white/20">Tap to expand Â· check off when revised Â· Focused Revision for deep review</p>
                   </div>
 
                   {/* Item list with stagger */}
@@ -1140,8 +1173,10 @@ export const EmergencyModePage = () => {
                                   <div className="bg-white/5 border border-white/5 rounded-xl p-3">
                                     <p className="text-sm text-white/50 leading-relaxed whitespace-pre-wrap break-words">{item.content}</p>
                                   </div>
-                                </div>
-                              </motion.div>
+
+
+</div>
+</motion.div>
                             )}
                           </AnimatePresence>
                         </motion.div>
@@ -1194,6 +1229,22 @@ export const EmergencyModePage = () => {
 };
 
 export default EmergencyModePage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
