@@ -311,6 +311,7 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
 ];
 
   const [step, setStep] = useState(0);
+  const [validationError, setValidationError] = useState('');
 
   const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
     .toISOString()
@@ -371,8 +372,23 @@ const strategyTip =
   const progress = ((step + 1) / steps.length) * 100;
   const isFinalStep = step === steps.length - 1;
 
-  const goNext = () => setStep(s => Math.min(steps.length - 1, s + 1));
-  const goBack = () => setStep(s => Math.max(0, s - 1));
+  const goNext = () => {
+    if (step === 0) {
+      const hasQuickTiming = ctx.hoursLeft > 0 && ctx.examDateTime === '';
+      const hasExactTiming = ctx.examDateTime !== '';
+      if (!hasQuickTiming && !hasExactTiming) {
+        setValidationError('Please pick a timing option or enter an exact exam date & time.');
+        return;
+      }
+    }
+    if (step === 2 && !ctx.chapters.trim()) {
+      setValidationError('Please add at least one chapter or topic to focus on.');
+      return;
+    }
+    setValidationError('');
+    setStep(s => Math.min(steps.length - 1, s + 1));
+  };
+  const goBack = () => { setValidationError(''); setStep(s => Math.max(0, s - 1)); };
 
   const timingPreset = (hours: number) => {
     setCtx({ ...ctx, hoursLeft: hours, examDateTime: '' });
@@ -642,6 +658,12 @@ const strategyTip =
           )}
         </AnimatePresence>
 
+        {validationError && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/30">
+            <div className="w-1 h-8 bg-red-500 rounded-full shrink-0" />
+            <p className="text-sm text-red-300 font-medium">{validationError}</p>
+          </div>
+        )}
         <div className="flex gap-3 pt-1">
           <button
             onClick={step === 0 ? onClose : goBack}
