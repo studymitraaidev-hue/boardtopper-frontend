@@ -280,11 +280,12 @@ function examTypeCls(current: string, val: string) {
     : 'px-3 py-2.5 rounded-xl border text-sm font-bold text-left transition-all bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500';
 }
 
-function ExamContextSheet({ ctx, setCtx, onStart, onClose }: {
-  ctx:     ExamContext;
-  setCtx:  (c: ExamContext) => void;
-  onStart: () => void;
-  onClose: () => void;
+function ExamContextSheet({ ctx, setCtx, onStart, onClose, userContext }: {
+  ctx:        ExamContext;
+  setCtx:     (c: ExamContext) => void;
+  onStart:    () => void;
+  onClose:    () => void;
+  userContext?: UserContext | null;
 }) {
   const EXAM_TYPES = [
     { value: 'unit_test'   as const, label: 'Unit Test',   emoji: 'ðŸ“', hint: 'Quick rescue for one unit' },
@@ -354,14 +355,25 @@ const selectedFocusLabel =
     ? focusTopics[0]
     : focusTopics.length + ' Topics Selected';
 
-const strategyTip =
-  ctx.hoursLeft <= 2
-    ? '⚡ PYQ Blitz: Focus only on previous year questions, formulas and definitions.'
-    : ctx.hoursLeft <= 6
-    ? '🔥 High-Weightage Rescue: Revise only important topics and frequently asked concepts.'
-    : ctx.hoursLeft <= 12
-    ? '📚 Smart Revision: Cover all selected chapters once and revise weak points.'
-    : '🎯 Full Recovery Plan: Complete syllabus coverage, revision and practice questions.';
+const weak = userContext?.weakSubjects ?? [];
+const priority = userContext?.prioritySubjects ?? [];
+const effectiveHours = ctx.examDateTime
+  ? Math.max(1, Math.round((new Date(ctx.examDateTime).getTime() - Date.now()) / 3600000))
+  : ctx.hoursLeft;
+const strategyTip = (() => {
+  const subjectHint = weak.length > 0
+    ? ` Focus extra on ${weak.slice(0, 2).join(' and ')}.`
+    : priority.length > 0
+    ? ` Prioritise ${priority.slice(0, 2).join(' and ')}.`
+    : '';
+  if (effectiveHours <= 2)
+    return '⚡ PYQ Blitz: Only previous year questions, formulas and key definitions.' + subjectHint;
+  if (effectiveHours <= 6)
+    return '🔥 High-Weightage Rescue: Revise important topics and frequent concepts.' + subjectHint;
+  if (effectiveHours <= 12)
+    return '📚 Smart Revision: Cover selected chapters once, then revise weak points.' + subjectHint;
+  return '🎯 Full Recovery Plan: Syllabus coverage, revision and practice questions.' + subjectHint;
+})();
 
   const steps = [
     { title: 'When is the exam?', subtitle: 'Start with the timing so we can make the plan realistic.' },
@@ -1254,6 +1266,7 @@ export const EmergencyModePage = () => {
             ctx={examContext}
             setCtx={setExamContext}
             onStart={() => handleStart(examContext)}
+            userContext={data?.userContext ?? null}
             onClose={() => setShowContext(false)}
           />
         )}
