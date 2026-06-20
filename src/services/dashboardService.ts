@@ -160,3 +160,16 @@ export async function completeChapter(payload: {
     return { ok: false, error: err instanceof Error ? err.message : 'Failed to mark chapter complete' };
   }
 }
+
+export async function updateProfile(payload: {
+  examDate?: string | null;
+  weakSubjects?: string[];
+  targetPercent?: number;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await api.patch('/api/auth/me', payload);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Failed to update profile' };
+  }
+}

@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useAuth } from '../context/AuthContext';
 import { api, ApiError } from '../utils/api';
+import { updateProfile } from '../services/dashboardService';
 import {
   Zap, AlertTriangle, CheckCircle2, BookOpen, ArrowRight, Crown,
   FileText, MessageCircle, Library, ChevronRight, X, Clock,
@@ -744,7 +745,7 @@ export const EmergencyModePage = () => {
     examType: 'board', chapters: '', hoursLeft: 12, examDateTime: '',
   });
 
-  const countdownSource = examContext.examDateTime || (data?.userContext?.examDate ?? null);
+  const countdownSource = data?.userContext?.examDate || examContext.examDateTime || null;
   const countdown = useCountdown(countdownSource);
 
   // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -762,6 +763,12 @@ export const EmergencyModePage = () => {
       const diff = new Date(ctx.examDateTime).getTime() - Date.now();
       effectiveHours = Math.max(1, Math.round(diff / 3600000));
     }
+    // Persist exam date to backend if an exact datetime was chosen
+    if (ctx.examDateTime) {
+      const isoDate = new Date(ctx.examDateTime).toISOString();
+      updateProfile({ examDate: isoDate }).catch(() => {});
+    }
+
     try {
       const params = `?examType=${ctx.examType}&chapters=${encodeURIComponent(ctx.chapters)}&hoursLeft=${effectiveHours}`;
       const result = await api.get<EmergencyData>(`/api/emergency${params}`);
