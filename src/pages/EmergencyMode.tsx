@@ -707,58 +707,75 @@ const strategyTip = (() => {
 // â”€â”€â”€ CountdownHero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CountdownHero({ countdown }: { countdown: { days: number; hours: number; minutes: number; seconds: number } }) {
-  const isToday    = countdown.days === 0;
-  const isCritical = isToday && countdown.hours < 3;
-  const urgencyBg  = isCritical
-    ? 'bg-red-950/60 border-red-500/40'
-    : isToday
-    ? 'bg-orange-950/40 border-orange-500/30'
-    : 'bg-slate-900/80 border-slate-700/60';
+  const totalHours  = countdown.days * 24 + countdown.hours;
+  const isPanic     = totalHours < 3;
+  const isCritical  = totalHours < 12;
+  const isToday     = countdown.days === 0;
+  const isComfy     = totalHours >= 48;
+
+  const accentColor = isPanic
+    ? { text: 'text-red-400',     bar: 'bg-red-500',     bg: 'bg-red-950/40 border-red-500/20',     label: 'text-red-300/70'     }
+    : isCritical
+    ? { text: 'text-orange-400',  bar: 'bg-orange-500',  bg: 'bg-orange-950/30 border-orange-500/15', label: 'text-orange-300/70'  }
+    : isComfy
+    ? { text: 'text-emerald-400', bar: 'bg-emerald-500', bg: 'bg-emerald-950/20 border-emerald-500/10', label: 'text-emerald-300/70' }
+    : { text: 'text-yellow-400',  bar: 'bg-yellow-400',  bg: 'bg-yellow-950/20 border-yellow-500/10', label: 'text-yellow-300/70'  };
+
+  const phrase = isPanic
+    ? 'Every minute counts. Stay locked in. ⚡'
+    : isCritical
+    ? 'This is your moment. Make it count. 🔥'
+    : isComfy
+    ? 'You have time. Use it wisely. 💪'
+    : 'Stay focused. The plan is working. 🎯';
+
+  const units = [
+    { val: countdown.days,    label: 'days' },
+    { val: countdown.hours,   label: 'hrs'  },
+    { val: countdown.minutes, label: 'min'  },
+    { val: countdown.seconds, label: 'sec'  },
+  ];
 
   return (
-    <div className={cn('rounded-2xl p-5 border transition-all', urgencyBg)}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={cn('rounded-2xl p-5 border transition-all duration-700', accentColor.bg)}>
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Clock size={13} className="text-white/30" />
+          <span className={cn('w-1.5 h-1.5 rounded-full', isPanic ? 'animate-ping bg-red-400' : 'bg-white/20')} />
           <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Time to exam</span>
         </div>
         {isToday && (
-          <span className="flex items-center gap-1.5 text-[10px] font-black text-red-300 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-full">
-            <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse inline-block" />
+          <span className={cn('text-[10px] font-black px-2.5 py-1 rounded-full border border-current/30', accentColor.text)}>
             EXAM DAY
           </span>
         )}
       </div>
-      <div className="flex items-end gap-4 sm:gap-6">
-        {[
-          { val: countdown.days,    label: 'days', pulse: false },
-          { val: countdown.hours,   label: 'hrs',  pulse: false },
-          { val: countdown.minutes, label: 'min',  pulse: false },
-          { val: countdown.seconds, label: 'sec',  pulse: true  },
-        ].map(({ val, label, pulse }) => (
+
+      <div className="flex items-end gap-5 sm:gap-8">
+        {units.map(({ val, label }, i) => (
           <div key={label} className="text-center">
-            {pulse ? (
+            {i === 3 ? (
               <motion.p
                 key={val}
-                initial={{ opacity: 0.5, scale: 0.88 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.18 }}
-                className="text-4xl sm:text-5xl font-black text-white font-mono tabular-nums"
+                initial={{ opacity: 0.4, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.15 }}
+                className={cn('text-4xl sm:text-5xl font-black tabular-nums leading-none', accentColor.text)}
               >
                 {String(val).padStart(2, '0')}
               </motion.p>
             ) : (
-              <p className="text-4xl sm:text-5xl font-black text-white font-mono tabular-nums">
-                {String(val).padStart(2, '0')}
+              <p className={cn('text-4xl sm:text-5xl font-black tabular-nums leading-none',
+                i === 0 && countdown.days > 0 ? 'text-white' : accentColor.text
+              )}>
+                {String(val).padStart(2, '00')}
               </p>
             )}
-            <p className="text-[10px] text-white/25 font-bold mt-1 uppercase tracking-wider">{label}</p>
+            <p className={cn('text-[10px] font-bold mt-2 uppercase tracking-widest', accentColor.label)}>{label}</p>
           </div>
         ))}
       </div>
-      {isCritical && (
-        <p className="text-xs text-red-400/80 font-bold mt-3">Focus on your weakest chapter first.</p>
-      )}
+
+      <p className={cn('text-xs font-bold mt-4 leading-relaxed', accentColor.text)}>{phrase}</p>
     </div>
   );
 }
