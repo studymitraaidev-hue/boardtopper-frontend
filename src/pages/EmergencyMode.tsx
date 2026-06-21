@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useAuth } from '../context/AuthContext';
 import { api, ApiError } from '../utils/api';
-import { updateProfile } from '../services/dashboardService';
+import { updateProfile, getQuickChapters, QuickChapterItem } from '../services/dashboardService';
 import {
   Zap, AlertTriangle, CheckCircle2, BookOpen, ArrowRight, Crown,
   FileText, MessageCircle, Library, ChevronRight, X, Clock,
@@ -302,14 +302,15 @@ function ExamContextSheet({ ctx, setCtx, onStart, onClose, userContext }: {
     { hours: 48, label: '2 days', note: 'More breathing room' },
   ];
 
-  const QUICK_CHAPTERS = [
-  '🔥 Most Important Topics',
-  '⚡ Last Minute Revision',
-  '🎯 Weak Chapters',
-  '📝 PYQs Focus',
-  '📚 Full Syllabus',
-  '🚀 Score Booster Topics'
-];
+  const [quickChapters, setQuickChapters] = useState<QuickChapterItem[]>([]);
+  const [chaptersLoading, setChaptersLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    getQuickChapters().then(items => {
+      if (!cancelled) { setQuickChapters(items); setChaptersLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const [step, setStep] = useState(0);
   const [validationError, setValidationError] = useState('');
@@ -624,29 +625,44 @@ const strategyTip = (() => {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.25em]">
-                  Quick examples
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {QUICK_CHAPTERS.map(chapter => (
-                    <button
-                      key={chapter}
-                      onClick={() => setCtx({ ...ctx, chapters: ctx.chapters.trim() ? ctx.chapters + ", " + chapter : chapter })}
-                      className={cn(
-                        'px-3 py-2 rounded-full border text-xs font-bold transition-all',
-                        ctx.chapters.trim() === chapter
-                          ? 'bg-red-500/20 border-red-500/40 text-red-200'
-                          : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
-                      )}
-                    >
-                      {chapter}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {!chaptersLoading && quickChapters.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.25em]">
+                      Your chapters
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {quickChapters.map(item => {
+                        const isSelected = ctx.chapters.split(',').map(c => c.trim()).includes(item.name);
+                        return (
+                          <button
+                            key={item.name}
+                            onClick={() => setCtx({ ...ctx, chapters: ctx.chapters.trim() ? ctx.chapters + ', ' + item.name : item.name })}
+                            className={cn(
+                              'px-3 py-2 rounded-full border text-xs font-bold transition-all flex items-center gap-1.5',
+                              isSelected
+                                ? 'bg-red-500/20 border-red-500/40 text-red-200'
+                                : item.isWeak
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:border-amber-400'
+                                : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                            )}
+                          >
+                            {item.isWeak && <AlertCircle size={11} className="shrink-0" />}
+                            {item.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {chaptersLoading && (
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="h-8 w-24 rounded-full bg-white/5 animate-pulse" />
+                    ))}
+                  </div>
+                )}
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
                 <p className="text-xs font-black text-white/50 uppercase tracking-wider">
                   Rescue plan preview
                 </p>

@@ -173,3 +173,19 @@ export async function updateProfile(payload: {
     return { ok: false, error: err instanceof Error ? err.message : 'Failed to update profile' };
   }
 }
+
+
+export interface QuickChapterItem {
+  name:      string;
+  subjectId: string;
+  isWeak:    boolean;
+}
+
+export async function getQuickChapters(): Promise<QuickChapterItem[]> {
+  try {
+    const result = await api.get<{ chapters: QuickChapterItem[] }>('/api/emergency/quick-chapters');
+    return Array.isArray(result?.chapters) ? result.chapters : [];
+  } catch {
+    return [];
+  }
+}
