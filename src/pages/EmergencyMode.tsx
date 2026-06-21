@@ -186,7 +186,7 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
             </div>
             <div className="relative space-y-2">
               <h2 className="text-2xl font-black text-white">Pro Feature</h2>
-              <p className="text-sm text-white/40 leading-relaxed">Emergency Mode is your personal exam survival toolkit â€” exclusive to Topper Pro.</p>
+              <p className="text-sm text-white/40 leading-relaxed">You have used your free Emergency Mode trial. Upgrade to Topper Pro for unlimited exam-survival sessions, anytime you need them.</p>
             </div>
             <div className="relative space-y-2 text-left bg-white/5 border border-white/10 rounded-2xl p-4">
               {[
@@ -783,21 +783,52 @@ function CountdownHero({ countdown }: { countdown: { days: number; hours: number
 // â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const EmergencyModePage = () => {
-  const { isPro } = useAuth();
+  const { isPro, user, updateUser } = useAuth();
+  const trialUsed      = user?.emergencyTrialUsed ?? false;
+  const hasFreeTrial   = !isPro && !trialUsed;
+  const trialExhausted = !isPro && trialUsed;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [loadState,    setLoadState]     = useState<LoadState>('idle');
-  const [data,         setData]          = useState<EmergencyData | null>(null);
+  const [loadState,    setLoadState]     = useState<LoadState>(() => {
+    try {
+      const saved = sessionStorage.getItem('em_loadState');
+      return saved === 'success' ? 'success' : 'idle';
+    } catch { return 'idle'; }
+  });
+  const [data,         setData]          = useState<EmergencyData | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('em_data');
+      return saved ? (JSON.parse(saved) as EmergencyData) : null;
+    } catch { return null; }
+  });
   const [errorMsg,     setErrorMsg]      = useState('');
   const [checked,      setChecked]       = useState<Set<number>>(new Set());
   const [focusIndex,   setFocusIndex]    = useState<number | null>(null);
   const [expandedIdx,  setExpandedIdx]   = useState<number | null>(null);
   const [showContext,  setShowContext]    = useState(false);
-  const [examContext,  setExamContext]   = useState<ExamContext>({
-    examType: 'board', chapters: '', hoursLeft: 12, examDateTime: '',
+  const [examContext,  setExamContext]   = useState<ExamContext>(() => {
+    try {
+      const saved = sessionStorage.getItem('em_examContext');
+      if (saved) return JSON.parse(saved) as ExamContext;
+    } catch { /* ignore */ }
+    return { examType: 'board', chapters: '', hoursLeft: 12, examDateTime: '' };
   });
 
   const countdownSource = data?.userContext?.examDate || examContext.examDateTime || null;
   const countdown = useCountdown(countdownSource);
+
+  // Persist Emergency Mode state across navigation
+  useEffect(() => {
+    try { sessionStorage.setItem('em_loadState', loadState); } catch { /* ignore */ }
+  }, [loadState]);
+  useEffect(() => {
+    try {
+      if (data) sessionStorage.setItem('em_data', JSON.stringify(data));
+      else sessionStorage.removeItem('em_data');
+    } catch { /* ignore */ }
+  }, [data]);
+  useEffect(() => {
+    try { sessionStorage.setItem('em_examContext', JSON.stringify(examContext)); } catch { /* ignore */ }
+  }, [examContext]);
 
   // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -840,6 +871,10 @@ export const EmergencyModePage = () => {
         userContext: result.userContext,
       });
       setLoadState('success');
+      // Mark free trial as used locally so ProGate appears next time, without a refresh
+      if (!isPro && !trialUsed) {
+        updateUser({ emergencyTrialUsed: true });
+      }
     } catch (err) {
       setErrorMsg(err instanceof ApiError ? (err.message || 'Request failed.') : 'Something went wrong.');
       setLoadState('error');
@@ -855,7 +890,12 @@ export const EmergencyModePage = () => {
     });
   };
 
-  const reset = () => { setLoadState('idle'); setData(null); setChecked(new Set()); };
+  const reset = () => {
+    setLoadState('idle');
+    setData(null);
+    setChecked(new Set());
+    setExamContext({ examType: 'board', chapters: '', hoursLeft: 12, examDateTime: '' });
+  };
 
   // â”€â”€ Derived values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -873,7 +913,7 @@ export const EmergencyModePage = () => {
 
   // â”€â”€ Early returns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  if (!isPro) return (
+  if (trialExhausted) return (
     <>
       <ProGate onUpgradeClick={() => setShowUpgradeModal(true)} />
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
@@ -1011,9 +1051,19 @@ export const EmergencyModePage = () => {
               <div className="absolute top-0 left-1/3 w-72 h-72 bg-red-600/12 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 right-0 w-48 h-48 bg-orange-600/8 rounded-full blur-3xl pointer-events-none" />
               <div className="relative z-10 p-6 sm:p-8 space-y-6">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse inline-block" />
                   <span className="text-[10px] font-black text-red-400/70 uppercase tracking-widest">Emergency Mode Active</span>
+                  {hasFreeTrial && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm shadow-amber-900/30"
+                    >
+                      <Sparkles size={10} className="text-amber-300" />
+                      1 Free Trial Available
+                    </motion.span>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-4xl sm:text-5xl font-black text-white leading-none tracking-tight">

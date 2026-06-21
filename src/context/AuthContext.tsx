@@ -17,6 +17,8 @@ export interface AuthUser {
   examDate: string | null;   // ISO date 'YYYY-MM-DD' or null
   avatar?: string;
   emailVerified: boolean;
+  onboardingComplete?: boolean;
+  emergencyTrialUsed?: boolean;
 }
 
 interface AuthContextType {
