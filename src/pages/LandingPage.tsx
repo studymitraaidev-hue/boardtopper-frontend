@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Hero } from '../components/landing/Hero';
+import LandingDemoBox from '../components/LandingDemoBox';
 import { EmergencyMode } from '../components/landing/EmergencyMode';
 import { ParentTrust } from '../components/landing/ParentTrust';
 import { Pricing } from '../components/landing/Pricing';
@@ -248,7 +249,7 @@ function CTASection() {
 export const LandingPage = () => (
   <div className="min-h-screen bg-white page-enter">
     <Navbar />
-    <Hero />
+    <Hero />\n      <LandingDemoBox />
     <FeaturesGrid />
     <HowItWorks />
     <EmergencyMode />
