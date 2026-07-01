@@ -15,7 +15,6 @@ export default function LandingDemoBox() {
     setError('');
     setLoading(true);
     setAnswer('');
-
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/ai/demo-ask`,
@@ -26,14 +25,12 @@ export default function LandingDemoBox() {
         }
       );
       const json = await res.json();
-
       if (!res.ok) {
         setError(json.error || 'Something went wrong. Try again.');
         if (res.status === 403) setUsed(true);
         setLoading(false);
         return;
       }
-
       setAnswer(json.data.answer);
       setUsed(true);
     } catch {
@@ -44,54 +41,211 @@ export default function LandingDemoBox() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto my-10 p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
-      <h3 className="text-lg font-bold text-gray-900 mb-1">
-        Try it free — ask any board exam doubt
-      </h3>
-      <p className="text-sm text-gray-500 mb-4">
-        No sign up needed. 1 free question.
-      </p>
+    <div style={{
+      background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+      borderRadius: '24px',
+      padding: '2px',
+      maxWidth: '720px',
+      margin: '0 auto 48px auto',
+      boxShadow: '0 25px 60px rgba(99,102,241,0.25)',
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #13111c, #1e1b2e)',
+        borderRadius: '22px',
+        padding: '36px 32px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Glow orb */}
+        <div style={{
+          position: 'absolute',
+          top: '-60px',
+          right: '-60px',
+          width: '200px',
+          height: '200px',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+        }} />
 
-      {!used && (
-        <div className="flex flex-col gap-3">
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="e.g. Explain photosynthesis with diagram"
-            className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-            maxLength={1000}
-          />
-          <button
-            onClick={handleAsk}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
-          >
-            {loading ? 'Thinking...' : 'Ask AI — Free'}
-          </button>
+        {/* Badge */}
+        <div style={{ marginBottom: '16px' }}>
+          <span style={{
+            background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+            color: 'white',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            padding: '4px 12px',
+            borderRadius: '99px',
+            textTransform: 'uppercase',
+          }}>
+            ✦ Free Trial — No Sign Up Needed
+          </span>
         </div>
-      )}
 
-      {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
+        {/* Headline */}
+        <h2 style={{
+          color: 'white',
+          fontSize: '22px',
+          fontWeight: 800,
+          margin: '0 0 6px 0',
+          lineHeight: 1.3,
+        }}>
+          Ask any board exam doubt — instantly
+        </h2>
+        <p style={{
+          color: 'rgba(255,255,255,0.5)',
+          fontSize: '14px',
+          margin: '0 0 24px 0',
+        }}>
+          Powered by AI trained for Maharashtra SSC board pattern
+        </p>
 
-      {answer && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-800 whitespace-pre-wrap max-h-72 overflow-y-auto">
-          {answer}
-        </div>
-      )}
+        {!used && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '14px',
+              padding: '4px',
+            }}>
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="e.g. Explain photosynthesis with diagram"
+                rows={3}
+                maxLength={1000}
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'white',
+                  fontSize: '15px',
+                  padding: '12px 14px',
+                  resize: 'none',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <button
+              onClick={handleAsk}
+              disabled={loading}
+              style={{
+                background: loading
+                  ? 'rgba(99,102,241,0.4)'
+                  : 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px',
+                fontSize: '15px',
+                fontWeight: 700,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+              }}
+            >
+              {loading ? (
+                <>
+                  <span style={{
+                    width: '16px', height: '16px',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: 'spin 0.8s linear infinite',
+                  }} />
+                  AI is thinking...
+                </>
+              ) : '⚡ Ask AI — Free'}
+            </button>
+          </div>
+        )}
 
-      {used && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-          <p className="text-sm text-blue-800 font-semibold mb-2">
-            Want unlimited doubts like this?
+        {error && (
+          <p style={{ color: '#f87171', fontSize: '13px', marginTop: '12px' }}>
+            {error}
           </p>
-        <a href="/signup"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg text-sm"
-        >
-          Create Free Account
-        </a>
-        </div>
-      )}
+        )}
+
+        {answer && (
+          <div style={{
+            marginTop: '20px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: '14px',
+            padding: '16px 18px',
+            color: 'rgba(255,255,255,0.85)',
+            fontSize: '14px',
+            lineHeight: 1.7,
+            maxHeight: '240px',
+            overflowY: 'auto',
+            whiteSpace: 'pre-wrap',
+          }}>
+            <div style={{
+              fontSize: '11px',
+              color: '#818cf8',
+              fontWeight: 600,
+              marginBottom: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}>
+              ✦ AI Answer
+            </div>
+            {answer}
+          </div>
+        )}
+
+        {used && (
+          <div style={{
+            marginTop: '20px',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))',
+            border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: '14px',
+            padding: '20px',
+            textAlign: 'center',
+          }}>
+            <p style={{
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '16px',
+              margin: '0 0 4px 0',
+            }}>
+              Want unlimited doubts like this?
+            </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '13px',
+              margin: '0 0 16px 0',
+            }}>
+              Get 3 free doubts every hour — no credit card needed
+            </p>
+            <a
+              href="/signup"
+              style={{
+                display: 'inline-block',
+                background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '14px',
+                padding: '12px 28px',
+                borderRadius: '10px',
+                textDecoration: 'none',
+              }}
+            >
+              Create Free Account →
+            </a>
+          </div>
+        )}
+
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     </div>
   );
 }
