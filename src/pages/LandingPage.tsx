@@ -14,7 +14,7 @@ import {
   Star, ArrowRight, Quote
 } from 'lucide-react';
 
-// ── Features ────────────────────────────────────────────────────────────────
+// ── Features ───────────────────────────────────────────────────────────[...]
 const FEATURES = [
   {
     icon: Brain,
@@ -50,7 +50,7 @@ const FEATURES = [
   },
 ];
 
-// ── Testimonials ─────────────────────────────────────────────────────────────
+// ── Testimonials ─────────────────────────────────────────────────────────[...]
 const TESTIMONIALS = [
   {
     name: 'A Student from Pune', score: '94.2%', board: 'Maharashtra State Board',
@@ -69,7 +69,7 @@ const TESTIMONIALS = [
   },
 ];
 
-// ── How It Works ─────────────────────────────────────────────────────────────
+// ── How It Works ─────────────────────────────────────────────────────────[...]
 const STEPS = [
   { step: '01', title: 'Create Free Account', desc: 'Sign up in 30 seconds. No credit card required.' },
   { step: '02', title: 'Complete Onboarding', desc: 'Select your board, subjects, and target score.' },
@@ -249,7 +249,8 @@ function CTASection() {
 export const LandingPage = () => (
   <div className="min-h-screen bg-white page-enter">
     <Navbar />
-    <Hero />\n      <LandingDemoBox />
+    <Hero />
+    <LandingDemoBox />
     <FeaturesGrid />
     <HowItWorks />
     <EmergencyMode />
