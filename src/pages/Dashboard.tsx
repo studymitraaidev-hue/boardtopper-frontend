@@ -432,7 +432,7 @@ export const Dashboard = () => {
 
           {/* ── Upgrade Banner ── */}
           {!isPro && (
-            <div className="relative bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950 rounded-2xl sm:rounded-3xl p-5 sm:p-7 overflow-hidden">
+            <div className="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-violet-950 rounded-2xl sm:rounded-3xl p-5 sm:p-7 overflow-hidden">
               <div className="absolute top-0 right-0 w-48 sm:w-72 h-full opacity-10 pointer-events-none">
                 <Crown size={200} className="absolute -right-8 -top-4 rotate-12" />
               </div>
@@ -451,7 +451,7 @@ export const Dashboard = () => {
                   </p>
                 </div>
                 <Link to="/pricing" className="shrink-0">
-                  <Button variant="secondary" className="gap-2 shadow-xl shadow-blue-600/20 bg-blue-600 hover:bg-blue-500 whitespace-nowrap">
+                  <Button variant="secondary" className="gap-2 shadow-xl shadow-blue-600/20 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 whitespace-nowrap">
                     Upgrade Now <ChevronRight size={16} />
                   </Button>
                 </Link>
@@ -467,7 +467,7 @@ export const Dashboard = () => {
               { label: 'Mock Score Avg', value: mockScoreDisplay,            sub: mockScoreSub,                                                            icon: Trophy,    dark: false },
               { label: 'Study Streak',   value: streakDisplay,               sub: progress.streakCount > 0 ? 'Keep it up!' : 'Start your streak today',   icon: Flame,     dark: false },
             ].map((stat) => (
-              <div key={stat.label} className={cn('rounded-2xl p-4 sm:p-5 border', stat.dark ? 'bg-blue-600 border-transparent shadow-xl shadow-blue-200' : 'bg-white border-slate-100 shadow-sm')}>
+              <div key={stat.label} className={cn('rounded-2xl p-4 sm:p-5 border', stat.dark ? 'bg-gradient-to-br from-indigo-600 to-violet-600 border-transparent shadow-xl shadow-indigo-200' : 'bg-white border-slate-100 shadow-sm')}>
                 <div className="flex items-start justify-between mb-3">
                   <p className={cn('text-[9px] font-black uppercase tracking-widest', stat.dark ? 'text-blue-200' : 'text-slate-400')}>
                     {stat.label}
@@ -571,9 +571,9 @@ export const Dashboard = () => {
 
               {/* AI Insights */}
               <div className="bg-slate-950 rounded-2xl overflow-hidden">
-                <div className="bg-gradient-to-br from-blue-600/25 to-violet-600/15 p-5">
+                <div className="bg-gradient-to-br from-indigo-600/25 to-violet-600/15 p-5">
                   <div className="flex items-center gap-2.5 mb-5">
-                    <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-600/30">
+                    <div className="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-xl shadow-lg shadow-indigo-600/30">
                       <Brain size={16} className="text-white" />
                     </div>
                     <div>
