@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import {
@@ -10,60 +10,64 @@ import {
   Settings,
 } from 'lucide-react';
 
-// â”€â”€â”€ Tab definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab definitions ─────────────────────────────
 
 const TABS = [
   {
-    label:  'Dashboard',
-    to:     '/dashboard',
-    icon:   LayoutDashboard,
-    match:  ['/dashboard'],
+    label: 'Dashboard',
+    to:    '/dashboard',
+    icon:  LayoutDashboard,
+    match: ['/dashboard'],
   },
   {
-    label:  'Ask Doubt',
-    to:     '/doubt-solver',
-    icon:   MessageCircle,
-    match:  ['/doubt-solver'],
+    label: 'Doubt',
+    to:    '/doubt-solver',
+    icon:  MessageCircle,
+    match: ['/doubt-solver'],
   },
   {
-    label:  'Notes',
-    to:     '/notes',
-    icon:   BookOpen,
-    match:  ['/notes', '/my-notes'],
+    label: 'Notes',
+    to:    '/notes',
+    icon:  BookOpen,
+    match: ['/notes', '/my-notes'],
   },
   {
-    label:  'Mock Test',
-    to:     '/simulation',
-    icon:   Trophy,
-    match:  ['/simulation'],
+    label: 'Test',
+    to:    '/simulation',
+    icon:  Trophy,
+    match: ['/simulation'],
   },
   {
-    label:  'Top Qs',
-    to:     '/likely-questions',
-    icon:   Zap,
-    match:  ['/likely-questions'],
+    label: 'Top Qs',
+    to:    '/likely-questions',
+    icon:  Zap,
+    match: ['/likely-questions'],
   },
   {
-    label:  'Settings',
-    to:     '/settings',
-    icon:   Settings,
-    match:  ['/settings'],
+    label: 'Settings',
+    to:    '/settings',
+    icon:  Settings,
+    match: ['/settings'],
   },
 ] as const;
 
-// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Component ─────────────────────────────
 
 /**
  * BottomNav
  *
  * Persistent bottom navigation bar for mobile screens (< 768px).
- * Hidden on md and above â€” the sidebar handles navigation there.
+ * Hidden on md and above — the sidebar handles navigation there.
  *
  * Fixed to the bottom of the viewport with safe-area padding so it
  * works correctly on iPhones with home indicator bars.
  *
  * Each tab is a full Link covering the entire tap target.
  * Minimum height 56px (h-14) for comfortable thumb tapping.
+ *
+ * Labels are kept to a single word each — six equal-width columns on a
+ * narrow phone don't have room for a two-word label without wrapping,
+ * and a wrapped label breaks vertical alignment with its neighbors.
  */
 export function BottomNav() {
   const { pathname } = useLocation();
@@ -97,19 +101,21 @@ export function BottomNav() {
                 'relative',
                 // Fill equal space, stack icon + label, center both axes
                 'flex-1 flex flex-col items-center justify-center gap-0.5',
-                // Touch target â€” full height of nav bar (h-14 = 56px)
+                // Touch target — full height of nav bar (h-14 = 56px)
                 'min-h-[56px]',
+                // Small horizontal breathing room so labels don't crowd neighbors
+                'px-1',
                 // Smooth colour transition
                 'transition-colors duration-150',
                 // Active vs inactive colours
                 isActive
-                  ? 'text-blue-600'
+                  ? 'text-indigo-600'
                   : 'text-slate-400 hover:text-slate-600 active:text-slate-700',
               )}
             >
-              {/* Icon â€” filled variant for active, outline for inactive */}
+              {/* Icon — filled variant for active, outline for inactive */}
               <Icon
-                size={22}
+                size={20}
                 className={cn(
                   'transition-transform duration-150',
                   isActive && 'scale-110',
@@ -117,11 +123,11 @@ export function BottomNav() {
                 strokeWidth={isActive ? 2.5 : 1.75}
               />
 
-              {/* Label */}
+              {/* Label — single word, no wrap, no letter-spacing to keep it tight */}
               <span
                 className={cn(
-                  'text-[10px] font-black leading-none tracking-wide',
-                  isActive ? 'text-blue-600' : 'text-slate-400',
+                  'text-[10px] font-black leading-none whitespace-nowrap',
+                  isActive ? 'text-indigo-600' : 'text-slate-400',
                 )}
               >
                 {tab.label}
@@ -130,7 +136,7 @@ export function BottomNav() {
               {/* Active indicator dot */}
               {isActive && (
                 <span
-                  className="absolute bottom-1.5 w-1 h-1 rounded-full bg-blue-600"
+                  className="absolute bottom-1.5 w-1 h-1 rounded-full bg-indigo-600"
                   aria-hidden="true"
                 />
               )}
@@ -143,6 +149,3 @@ export function BottomNav() {
 }
 
 export default BottomNav;
-
-
-
