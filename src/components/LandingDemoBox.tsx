@@ -52,7 +52,7 @@ export default function LandingDemoBox() {
       <div style={{
         background: 'linear-gradient(135deg, #13111c, #1e1b2e)',
         borderRadius: '22px',
-        padding: '36px 32px',
+        padding: 'clamp(20px, 5vw, 36px) clamp(16px, 4vw, 32px)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -71,10 +71,10 @@ export default function LandingDemoBox() {
           <span style={{
             background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
             color: 'white',
-            fontSize: '11px',
+            fontSize: 'clamp(9px, 2.5vw, 11px)', whiteSpace: 'nowrap',
             fontWeight: 700,
             letterSpacing: '0.1em',
-            padding: '4px 12px',
+            padding: '4px 10px',
             borderRadius: '99px',
             textTransform: 'uppercase',
           }}>
@@ -84,7 +84,7 @@ export default function LandingDemoBox() {
 
         <h2 style={{
           color: 'white',
-          fontSize: '22px',
+          fontSize: 'clamp(18px, 5vw, 22px)',
           fontWeight: 800,
           margin: '0 0 6px 0',
           lineHeight: 1.3,
@@ -174,7 +174,7 @@ export default function LandingDemoBox() {
             whiteSpace: 'pre-wrap',
           }}>
             <div style={{
-              fontSize: '11px',
+              fontSize: 'clamp(9px, 2.5vw, 11px)', whiteSpace: 'nowrap',
               color: '#818cf8',
               fontWeight: 600,
               marginBottom: '8px',
