@@ -68,3 +68,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 
 .text-balance{text-wrap:balance}
+
+@keyframes fade-in-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.animate-fade-in-up{animation:fade-in-up .5s ease-out forwards}
+.animate-fade-in{animation:fade-in-up .6s ease-out forwards}
+.animate-shimmer{animation:shimmer 3s ease-in-out infinite}
