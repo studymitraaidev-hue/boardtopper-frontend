@@ -22,7 +22,7 @@ function formatTime(): string { return new Date().toLocaleTimeString('en-US', { 
 function ShimmerText({ text, className }: { text: string; className?: string }) {
   return (
     <span className={cn("relative inline-block", className)}>
-      <span className="relative z-10">{text}</span>
+      <span className="relative z-10 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent">{text}</span>
       <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer bg-[length:200%_100%] z-0" />
     </span>
   );
@@ -169,7 +169,7 @@ export default function DoubtSolver() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => navigate('/history')} className="p-2.5 rounded-xl hover:bg-slate-100/80 transition-all duration-300 group"><History className="w-5 h-5 text-slate-500 group-hover:text-indigo-500 transition-colors" /></button>
-            <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 flex items-center gap-1.5"><Crown className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs font-bold text-amber-700">{dailyCount}/3</span></div>
+            <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 flex items-center gap-1.5"><Crown className="w-3.5 h-3.5 text-amber-500" /><span className="text-xs font-bold text-amber-700">{dailyCount}/5</span></div>
           </div>
         </div>
       </header>
