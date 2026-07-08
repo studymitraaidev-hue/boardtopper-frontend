@@ -230,7 +230,7 @@ function AnswerMarkdown({ text }: { text: string }) {
             </blockquote>
           ),
           a: ({ children, href }) => (
-            
+            <a
               href={href}
               target="_blank"
               rel="noopener noreferrer"
