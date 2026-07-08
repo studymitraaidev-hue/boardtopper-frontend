@@ -74,3 +74,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 .animate-fade-in-up{animation:fade-in-up .5s ease-out forwards}
 .animate-fade-in{animation:fade-in-up .6s ease-out forwards}
 .animate-shimmer{animation:shimmer 3s ease-in-out infinite}
+
+/* === PREMIUM ANIMATIONS === */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes blobFloat { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(24px,-16px) scale(1.08); } 66% { transform: translate(-16px,20px) scale(1.04); } }
+@keyframes confetti-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+.animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
+.animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-blob-float { animation: blobFloat 12s ease-in-out infinite; }
+.safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 0px); }
