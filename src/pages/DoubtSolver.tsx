@@ -412,6 +412,7 @@ export default function DoubtSolver() {
   const navigate = useNavigate();
 
   const [chatHistory, setChatHistory] = useState<Array<{question: string; answer: string; subject: string}>>([]);
+  const [saveStatus, setSaveStatus] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [query, setQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
