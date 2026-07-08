@@ -333,7 +333,7 @@ export const ExamSimulation = () => {
               ))}
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-6">
               <p className="text-base font-bold text-slate-900 leading-relaxed mb-6">{q.question}</p>
               <div className="space-y-3">
                 {q.options.map((opt, idx) => (
@@ -396,7 +396,7 @@ export const ExamSimulation = () => {
       <AppLayout>
         <main className="flex-1 min-w-0 overflow-y-auto h-screen page-enter">
           <div className="p-4 sm:p-6 max-w-xl mx-auto space-y-5 pt-10">
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-8 text-center space-y-4">
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-8 text-center space-y-4">
               <div className={cn('inline-flex p-4 rounded-2xl', passed ? 'bg-emerald-50' : 'bg-red-50')}>
                 {passed ? <Trophy size={32} className="text-amber-500" /> : <AlertTriangle size={32} className="text-red-500" />}
               </div>
@@ -475,7 +475,7 @@ export const ExamSimulation = () => {
         <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-5xl">
 
           <div className="grid grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-2xl p-4 sm:p-5 shadow-lg shadow-indigo-200">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-4 sm:p-5 shadow-lg shadow-indigo-500/25 backdrop-blur-xl">
               <Trophy size={22} className="text-amber-300 mb-3" />
               <p className="text-3xl sm:text-4xl font-black">
                 {statsLoading ? 'â€¦' : stats.averageScore !== null ? `${stats.averageScore}%` : 'â€”'}
@@ -557,7 +557,7 @@ export const ExamSimulation = () => {
 
           {/* -- Score History Chart (Day 35) -------------------------- */}
           {recentAttempts.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <h3 className="font-extrabold text-slate-900">Score History</h3>
