@@ -1068,7 +1068,7 @@ export const EmergencyModePage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
               className="relative rounded-3xl overflow-hidden border border-red-500/20"
-              style={{ background: 'linear-gradient(135deg, #0c0608 0%, #160a0a 50%, #0c0c0f 100%)' }}
+              className="backdrop-blur-xl bg-gray-900/70 border border-white/10 rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(12,6,8,0.9) 0%, rgba(22,10,10,0.9) 50%, rgba(12,12,15,0.9) 100%)" }}
             >
               <div className="absolute top-0 left-1/3 w-72 h-72 bg-red-600/12 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 right-0 w-48 h-48 bg-orange-600/8 rounded-full blur-3xl pointer-events-none" />
@@ -1153,19 +1153,19 @@ export const EmergencyModePage = () => {
 
                             {/* Emergency Summary */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-red-500/20 bg-red-950/30 p-4">
+                <div className="rounded-2xl border border-red-500/20 bg-red-950/40 backdrop-blur-xl p-4 shadow-lg">
                   <p className="text-[10px] font-black uppercase tracking-widest text-red-300/80">Urgency</p>
                   <p className="mt-2 text-lg font-black text-white capitalize">{urgencyLevel}</p>
                   <p className="text-xs text-white/35 mt-1">Personalized by your exam date</p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-lg">
                   <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Time Left</p>
                   <p className="mt-2 text-lg font-black text-white">
                     {data.userContext.timeRemainingMinutes === null ? 'Set exam date' : `${data.userContext.timeRemainingMinutes} min`}
                   </p>
                   <p className="text-xs text-white/35 mt-1">Live from your saved exam date</p>
                 </div>
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-950/30 p-4">
+                <div className="rounded-2xl border border-amber-500/20 bg-amber-950/40 backdrop-blur-xl p-4 shadow-lg">
                   <p className="text-[10px] font-black uppercase tracking-widest text-amber-300/80">Priority Subjects</p>
                   <p className="mt-2 text-lg font-black text-white">
                     {prioritySubjects.length > 0 ? prioritySubjects.slice(0, 3).join(', ') : 'No weak subjects yet'}
@@ -1255,7 +1255,7 @@ export const EmergencyModePage = () => {
                             isDone     ? 'border-emerald-500/20 bg-emerald-950/20' :
                             isHigh     ? 'border-amber-500/20 bg-[#111118]' :
                             isExpanded ? 'border-red-500/20 bg-[#0f0f18]' :
-                            'border-white/5 bg-[#111118] hover:border-white/10'
+                            'border-white/5 bg-[#111118]/80 backdrop-blur-xl hover:border-white/10 shadow-lg'
                           )}
                         >
                           <div className="p-4 sm:p-5 flex items-start gap-3">
