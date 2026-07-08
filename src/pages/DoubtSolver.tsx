@@ -871,6 +871,12 @@ export default function DoubtSolver() {
                     selectedImage ? 'text-indigo-500' : 'text-slate-400 group-hover/btn:text-indigo-500',
                   )}
                 />
+          {saveStatus && (
+            <div className={"text-xs text-center py-1 " + (saveStatus === "Saved!" ? "text-green-600" : "text-red-500")}>
+              {saveStatus}
+            </div>
+          )}
+
               </button>
               <textarea
                 ref={textareaRef}
