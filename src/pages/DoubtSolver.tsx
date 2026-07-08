@@ -28,6 +28,7 @@ import {
   RotateCcw,
   Plus,
 } from 'lucide-react';
+import { supabase } from '../utils/supabaseClient';
 import { cn } from '../utils/cn';
 
 /* ──────────────────────────────────────────
@@ -410,6 +411,7 @@ function SubjectSelector({ selected, onSelect }: { selected: string; onSelect: (
 export default function DoubtSolver() {
   const navigate = useNavigate();
 
+  const [chatHistory, setChatHistory] = useState<Array<{question: string; answer: string; subject: string}>>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [query, setQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -447,6 +449,23 @@ export default function DoubtSolver() {
       textareaRef.current.style.height = `${Math.min(120, textareaRef.current.scrollHeight)}px`;
     }
   }, [query]);
+
+  // Fetch chat history on mount
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const { data, error } = await supabase
+        .rpc('get_recent_chat_history', { limit_count: 10 });
+      if (!error && data) {
+        setChatHistory(data.map((h: any) => ({
+          question: h.question,
+          answer: h.answer,
+          subject: h.subject,
+        })));
+      }
+    };
+    fetchHistory();
+  }, []);
+
 
   const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -507,7 +526,7 @@ export default function DoubtSolver() {
     return fetch(`${BASE_URL}/api/ai/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ question: questionText, subject }),
+      body: JSON.stringify({ question: questionText, subject, history: chatHistory.slice(0, 5) }),
     });
   }, []);
 
@@ -559,6 +578,14 @@ export default function DoubtSolver() {
       }
 
       setMessages((prev) => [...prev, { id: generateId(), role: 'ai', text: result.text, time: formatTime() }]);
+
+        // Save to chat history
+        await supabase.from('ai_chat_history').insert({
+          question: questionText,
+          answer: result.text,
+          subject: subjectToSend,
+        });
+
     } catch {
       const errorId = generateId();
       setLastFailed({ id: errorId, text: questionText, subject: subjectToSend, image: imageToSend });
@@ -700,6 +727,34 @@ export default function DoubtSolver() {
       </header>
 
       <main className="relative z-10 max-w-3xl mx-auto px-4 pt-6 pb-48">
+
+      {/* Recent Questions History */}
+      {chatHistory.length > 0 && (
+        <div className="mb-4 animate-fade-in">
+          <details className="group">
+            <summary className="flex items-center justify-between p-3 rounded-xl bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-sm cursor-pointer list-none">
+              <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <History className="w-4 h-4 text-indigo-500" />
+                Recent Questions ({chatHistory.length})
+              </span>
+              <ChevronRight className="w-4 h-4 text-slate-400 transition-transform group-open:rotate-90" />
+            </summary>
+            <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+              {chatHistory.map((h, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setQuery(h.question); setSelectedSubject(h.subject || 'general'); }}
+                  className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-indigo-50 border border-slate-100 transition-colors"
+                >
+                  <p className="text-xs font-medium text-indigo-600 mb-1">{h.subject || 'General'}</p>
+                  <p className="text-sm text-slate-700 line-clamp-2">{h.question}</p>
+                </button>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
+
         {showWelcome && messages.length === 0 ? (
           <div className="space-y-8 animate-fade-in">
             <div className="text-center pt-10 pb-2">
