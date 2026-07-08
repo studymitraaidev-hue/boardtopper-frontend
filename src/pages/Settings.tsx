@@ -587,11 +587,11 @@ export default function Settings() {
                     </span>
                     <p className="text-sm text-slate-600 mt-2">
                       Your Pro access renews on{' '}
-                      {new Date(subscriptionStatus?.subscription?.endsAt).toLocaleDateString('en-IN', {
+                      {subscriptionStatus?.subscription?.endsAt ? new Date(subscriptionStatus.subscription.endsAt).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
-                      })}.
+                      }) : 'N/A'}.
                     </p>
                     <div className="mt-4">
                       <Button
