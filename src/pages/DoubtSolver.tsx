@@ -560,7 +560,7 @@ export default function DoubtSolver() {
       if (!result.ok) {
         const errorId = generateId();
         if (!result.rateLimited) {
-          setLastFailed({ id: errorId, text: questionText, subject: subjectToSend, image: imageToSend });
+          setLastFailed({ id: errorId, text: questionText, subject: subject, image: imageToSend });
         }
         setMessages((prev) => [
           ...prev,
@@ -583,12 +583,12 @@ export default function DoubtSolver() {
         await supabase.from('ai_chat_history').insert({
           question: questionText,
           answer: result.text,
-          subject: subjectToSend,
+          subject: subject,
         });
 
     } catch {
       const errorId = generateId();
-      setLastFailed({ id: errorId, text: questionText, subject: subjectToSend, image: imageToSend });
+      setLastFailed({ id: errorId, text: questionText, subject: subject, image: imageToSend });
       setMessages((prev) => [
         ...prev,
         {
