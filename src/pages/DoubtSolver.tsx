@@ -31,6 +31,15 @@ import {
 import { supabase } from '../utils/supabaseClient';
 import { cn } from '../utils/cn';
 
+const getUserIdFromToken = (): string | null => {
+  try {
+    const token = localStorage.getItem('bt_token');
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.id || payload.sub || null;
+  } catch { return null; }
+};
+
 /* ──────────────────────────────────────────
    Types
    ────────────────────────────────────────── */
@@ -583,7 +592,9 @@ export default function DoubtSolver() {
       setMessages((prev) => [...prev, { id: generateId(), role: 'ai', text: result.text, time: formatTime() }]);
 
         // Save to chat history
+        const userId = getUserIdFromToken();
         const { error: saveErr } = await supabase.from('ai_chat_history').insert({
+          user_id: userId,
           question: questionText,
           answer: result.text,
           subject: subject,
