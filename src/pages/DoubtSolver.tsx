@@ -602,6 +602,9 @@ export default function DoubtSolver() {
         });
         if (saveRes.ok) {
           setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
+        } else {
+          const errText = await saveRes.text();
+          alert('SAVE FAILED: ' + saveRes.status + ' - ' + errText);
         }
 
     } catch {
