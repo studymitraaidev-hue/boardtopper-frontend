@@ -454,6 +454,8 @@ export default function DoubtSolver() {
   // Fetch chat history on mount
   useEffect(() => {
     const fetchHistory = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
       const { data, error } = await supabase
         .rpc('get_recent_chat_history', { limit_count: 10 });
       if (!error && data) {
@@ -581,11 +583,14 @@ export default function DoubtSolver() {
       setMessages((prev) => [...prev, { id: generateId(), role: 'ai', text: result.text, time: formatTime() }]);
 
         // Save to chat history
-        await supabase.from('ai_chat_history').insert({
+        const { error: saveErr } = await supabase.from('ai_chat_history').insert({
           question: questionText,
           answer: result.text,
           subject: subject,
         });
+        if (!saveErr) {
+          setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
+        }
 
     } catch {
       const errorId = generateId();
