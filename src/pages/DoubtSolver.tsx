@@ -463,11 +463,13 @@ export default function DoubtSolver() {
   // Fetch chat history on mount
   useEffect(() => {
     const fetchHistory = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const { data, error } = await supabase
-        .rpc('get_recent_chat_history', { limit_count: 10 });
-      if (!error && data) {
+      const token = localStorage.getItem('bt_token');
+      if (!token) return;
+      const res = await fetch(`${BASE_URL}/api/history`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setChatHistory(data.map((h: any) => ({
           question: h.question,
           answer: h.answer,
@@ -592,14 +594,13 @@ export default function DoubtSolver() {
       setMessages((prev) => [...prev, { id: generateId(), role: 'ai', text: result.text, time: formatTime() }]);
 
         // Save to chat history
-        const userId = getUserIdFromToken();
-        const { error: saveErr } = await supabase.from('ai_chat_history').insert({
-          user_id: userId,
-          question: questionText,
-          answer: result.text,
-          subject: subject,
+        const token = localStorage.getItem('bt_token');
+        const saveRes = await fetch(`${BASE_URL}/api/history/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ question: questionText, answer: result.text, subject }),
         });
-        if (!saveErr) {
+        if (saveRes.ok) {
           setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
         }
 
