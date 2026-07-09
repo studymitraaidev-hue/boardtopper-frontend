@@ -531,7 +531,7 @@ export default function DoubtSolver() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ question: questionText, subject, history: chatHistory.slice(0, 5) }),
     });
-  }, []);
+  }, [chatHistory]);
 
   const handleSend = useCallback(async () => {
     if ((!query.trim() && !selectedImage) || isTyping) return;
