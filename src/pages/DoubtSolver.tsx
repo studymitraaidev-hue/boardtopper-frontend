@@ -465,17 +465,20 @@ export default function DoubtSolver() {
     const fetchHistory = async () => {
       const token = localStorage.getItem('bt_token');
       if (!token) return;
-      const res = await fetch(`${BASE_URL}/api/history`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setChatHistory(data.map((h: any) => ({
-          question: h.question,
-          answer: h.answer,
-          subject: h.subject,
-        })));
-      }
+      try {
+        const res = await fetch(`${BASE_URL}/api/history`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) { console.error('History fetch failed', res.status); return; }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setChatHistory(data.map((h: any) => ({
+            question: h.question,
+            answer: h.answer,
+            subject: h.subject,
+          })));
+        }
+      } catch (e) { console.error('History fetch error', e); }
     };
     fetchHistory();
   }, []);
@@ -594,16 +597,25 @@ export default function DoubtSolver() {
       setMessages((prev) => [...prev, { id: generateId(), role: 'ai', text: result.text, time: formatTime() }]);
 
         // Save to chat history
-        const token = localStorage.getItem('bt_token');
-        const saveRes = await fetch(`${BASE_URL}/api/history/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ question: questionText, answer: result.text, subject }),
-        });
-        if (saveRes.ok) {
-          setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
-        } else {
-          console.error('Save failed', saveRes.status, await saveRes.text());
+        try {
+          const token = localStorage.getItem('bt_token');
+          const saveRes = await fetch(`${BASE_URL}/api/history/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ question: questionText, answer: result.text, subject }),
+          });
+          if (saveRes.ok) {
+            setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
+            setSaveStatus('Saved!');
+            setTimeout(() => setSaveStatus(''), 3000);
+          } else {
+            const errText = await saveRes.text();
+            console.error('Save failed', saveRes.status, errText);
+            setSaveStatus('Save failed: ' + saveRes.status);
+          }
+        } catch (saveErr: any) {
+          console.error('Save error', saveErr);
+          setSaveStatus('Save error: ' + (saveErr.message || 'network'));
         }
 
     } catch {
