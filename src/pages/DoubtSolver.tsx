@@ -600,11 +600,10 @@ export default function DoubtSolver() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ question: questionText, answer: result.text, subject }),
         });
+        const saveText = await saveRes.text();
+        alert('SAVE STATUS: ' + saveRes.status + ' BODY: ' + saveText);
         if (saveRes.ok) {
           setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
-        } else {
-          const errText = await saveRes.text();
-          alert('SAVE FAILED: ' + saveRes.status + ' - ' + errText);
         }
 
     } catch {
