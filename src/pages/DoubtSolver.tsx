@@ -602,10 +602,10 @@ export default function DoubtSolver() {
           const saveRes = await fetch(`${BASE_URL}/api/history/save`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ question: questionText, answer: result.text, subject }),
+            body: JSON.stringify({ question: questionText, answer: result.text, subject: subjectToSend }),
           });
           if (saveRes.ok) {
-            setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subject || 'general' }, ...prev].slice(0, 10));
+            setChatHistory(prev => [{ question: questionText, answer: result.text, subject: subjectToSend || 'general' }, ...prev].slice(0, 10));
             setSaveStatus('Saved!');
             setTimeout(() => setSaveStatus(''), 3000);
           } else {
