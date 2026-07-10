@@ -469,7 +469,7 @@ export default function DoubtSolver() {
         const res = await fetch(`${BASE_URL}/api/history`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (!res.ok) { console.error('History fetch failed', res.status); return; }
+        if (!res.ok) { console.error('History fetch failed', res.status); setSaveStatus('Fetch failed: ' + res.status); return; }
         const data = await res.json();
         if (Array.isArray(data)) {
           setChatHistory(data.map((h: any) => ({
