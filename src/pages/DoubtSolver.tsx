@@ -11,6 +11,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import {
   Send,
   ImagePlus,
@@ -185,6 +188,8 @@ function AnswerMarkdown({ text }: { text: string }) {
   return (
     <div className="prose-doubt">
       <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           h1: ({ children }) => (
             <h1 className="text-lg font-black text-slate-900 mt-4 mb-2 first:mt-0">{children}</h1>
