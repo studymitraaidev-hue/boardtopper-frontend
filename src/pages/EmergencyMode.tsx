@@ -13,6 +13,10 @@ import {
   Flame, RefreshCw, CheckCheck, Maximize2, Minimize2,
   ChevronLeft, AlertCircle, TrendingUp, Star, Sparkles, Calendar,
 } from 'lucide-react';
+import BossBattle from '../components/BossBattle';
+import PlayerStats from '../components/PlayerStats';
+import PredictedQuestions from '../components/PredictedQuestions';
+import ParentReport from '../components/ParentReport';
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
