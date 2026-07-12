@@ -1067,8 +1067,7 @@ export const EmergencyModePage = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
-              className="relative rounded-3xl overflow-hidden border border-red-500/20"
-              className="backdrop-blur-xl bg-gray-900/70 border border-white/10 rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(12,6,8,0.9) 0%, rgba(22,10,10,0.9) 50%, rgba(12,12,15,0.9) 100%)" }}
+              className="relative rounded-3xl overflow-hidden border border-red-500/20 backdrop-blur-xl bg-gray-900/70" style={{ background: "linear-gradient(135deg, rgba(12,6,8,0.9) 0%, rgba(22,10,10,0.9) 50%, rgba(12,12,15,0.9) 100%)" }}
             >
               <div className="absolute top-0 left-1/3 w-72 h-72 bg-red-600/12 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 right-0 w-48 h-48 bg-orange-600/8 rounded-full blur-3xl pointer-events-none" />
