@@ -261,7 +261,14 @@ export const ExamSimulation = () => {
         <main className="flex-1 min-w-0 overflow-y-auto h-screen page-enter flex items-center justify-center">
           <div className="text-center space-y-4">
             <Loader2 className="animate-spin text-blue-500 mx-auto" size={32} />
-            <p className="text-base font-bold text-slate-800">Generating your {selectedSubject?.name} quiz?</p>
+            <p className="text-base font-bold text-slate-800 transition-opacity duration-300">
+              {[
+                `Generating your ${selectedSubject?.name || ''} quiz...`,
+                "Picking questions from the SSC pattern...",
+                "Balancing difficulty levels...",
+                "Almost ready...",
+              ][Math.floor((Date.now() / 4000) % 4)]}
+            </p>
             <p className="text-xs text-slate-400">Tailored to Maharashtra SSC board pattern</p>
           </div>
         </main>
