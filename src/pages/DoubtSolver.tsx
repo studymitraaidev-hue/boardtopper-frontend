@@ -371,6 +371,22 @@ function MessageBubble({
    ────────────────────────────────────────── */
 
 function TypingIndicator() {
+  const messages = [
+    "Reading your question...",
+    "Thinking it through...",
+    "Checking board exam patterns...",
+    "Working out the steps...",
+    "Almost there...",
+  ];
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % messages.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex w-full mb-5 animate-fade-in-up">
       <div className="flex gap-3">
@@ -378,10 +394,15 @@ function TypingIndicator() {
           <Sparkles className="w-4 h-4 text-white animate-pulse" />
         </div>
         <div className="px-5 py-4 rounded-2xl bg-white/85 backdrop-blur-md border border-slate-100/80 rounded-tl-sm shadow-[0_4px_20px_rgba(79,70,229,0.06)]">
-          <div className="flex gap-1.5 items-center h-5">
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1.5 items-center h-5">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="text-sm text-slate-500 transition-opacity duration-300">
+              {messages[msgIndex]}
+            </span>
           </div>
         </div>
       </div>
