@@ -28,6 +28,28 @@ interface AiTip {
   points:  string[];
 }
 
+interface GameStats {
+  bossName:         string;
+  bossHp:           number;
+  bossMaxHp:        number;
+  defeatedSections: string[];
+  playerXp:         number;
+  playerLevel:      number;
+  subjectStrength:  Record<string, number>;
+}
+
+interface LikelyQuestion {
+  question:      string;
+  marks:         number;
+  type:          string;
+  subject:       string;
+  chapter:       string;
+  likelihood:    'very_high' | 'high' | 'medium';
+  answerHint:    string;
+  appearedYears: number[];
+  source:        'pyq' | 'ai';
+}
+
 type EmergencyMode = 'notes' | 'doubts' | 'fallback' | 'empty';
 type LoadState     = 'idle' | 'loading' | 'success' | 'error';
 
@@ -50,10 +72,12 @@ interface UserContext {
 }
 
 interface EmergencyData {
-  mode:        EmergencyMode;
-  items:       EmergencyItem[];
-  aiTips:      AiTip[];
-  userContext: UserContext;
+  mode:            EmergencyMode;
+  items:           EmergencyItem[];
+  aiTips:          AiTip[];
+  userContext:     UserContext;
+  gameStats:       GameStats;
+  likelyQuestions: LikelyQuestion[];
 }
 
 // â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -193,7 +217,7 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
                 'AI revision tips for your weak subjects',
                 'Weak subject items shown first',
                 'Live exam countdown timer',
-                'Focused Revision â€” one card at a time',
+                'Focused Revision -” one card at a time',
                 ].map(f => (
                 <div key={f} className="flex items-center gap-2.5 text-sm text-white/60">
                   <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />{f}
@@ -202,7 +226,7 @@ function ProGate({ onUpgradeClick }: { onUpgradeClick: () => void }) {
             </div>
             <div className="relative">
               <Button variant="gold" fullWidth className="gap-2 justify-center font-black py-3 text-base" onClick={onUpgradeClick}>
-                <Crown size={16} /> Upgrade to Topper Pro â€” Rs.99/mo
+                <Crown size={16} /> Upgrade to Topper Pro -” Rs.99/mo
               </Button>
               <Link to="/pricing" className="block text-xs text-white/30 hover:text-white/60 transition-colors mt-3">See full plan details</Link>
             </div>
@@ -540,7 +564,7 @@ const strategyTip = (() => {
                   <p className="text-sm text-white/70 leading-relaxed">
                     {ctx.examDateTime
                       ? previewHours !== null && previewHours > 0
-                        ? `Great â€” we will plan around this exact time. ${previewHours >= 24
+                        ? `Great -” we will plan around this exact time. ${previewHours >= 24
                             ? `${Math.floor(previewHours / 24)}d ${previewHours % 24}h left.`
                             : `${previewHours}h left.`}`
                         : 'This time is in the past or very close. Pick a future time.'
@@ -1092,7 +1116,7 @@ export const EmergencyModePage = () => {
                     <span className="text-red-400">few hours?</span>
                   </h2>
                   <p className="text-sm text-white/35 mt-4 leading-relaxed max-w-sm">
-                    Pulls your notes and doubts, prioritises weak subjects, generates AI revision tips â€” in one focused session.
+                    Pulls your notes and doubts, prioritises weak subjects, generates AI revision tips -” in one focused session.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
