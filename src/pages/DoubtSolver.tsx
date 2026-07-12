@@ -746,7 +746,13 @@ export default function DoubtSolver() {
               <Plus className="w-5 h-5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
             </button>
             <button
-              onClick={() => navigate('/history')}
+              onClick={() => {
+                const panel = document.getElementById('recent-questions-panel') as HTMLDetailsElement | null;
+                if (panel) {
+                  panel.open = true;
+                  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
               title="History"
               className="p-2.5 rounded-xl hover:bg-slate-100/80 transition-colors duration-200 group"
             >
@@ -757,7 +763,7 @@ export default function DoubtSolver() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 hover:border-amber-300 transition-colors"
             >
               <Crown className="w-3.5 h-3.5 text-amber-500" />
-              <span className="text-xs font-bold text-amber-700">Pro</span>
+              <span className="text-xs font-bold text-amber-700">Upgrade</span>
             </button>
           </div>
         </div>
@@ -768,7 +774,7 @@ export default function DoubtSolver() {
       {/* Recent Questions History */}
       {chatHistory.length > 0 && (
         <div className="mb-4 animate-fade-in">
-          <details className="group">
+          <details className="group" id="recent-questions-panel">
             <summary className="flex items-center justify-between p-3 rounded-xl bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-sm cursor-pointer list-none">
               <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <History className="w-4 h-4 text-indigo-500" />
