@@ -1193,81 +1193,90 @@ export const EmergencyModePage = () => {
               {/* Countdown */}
               {countdown && <CountdownHero countdown={countdown} />}
 
-              {/* Gamified Dashboard */}
+              {/* Gamified Dashboard — 3D Glassmorphism */}
               {data.gameStats && (
-                <div className="grid grid-cols-1 gap-3">
-                  <BossBattle
-                    bossName={data.gameStats.bossName}
-                    bossHp={data.gameStats.bossHp}
-                    bossMaxHp={data.gameStats.bossMaxHp}
-                    defeatedSections={defeatedSectionsCount}
-                    totalSections={totalSections}
-                    doneCount={doneCount}
-                    totalItems={totalItems}
-                  />
-                  <PlayerStats
-                    playerXp={data.gameStats.playerXp}
-                    playerLevel={data.gameStats.playerLevel}
-                    streakCount={data.userContext.streakCount}
-                    urgencyLevel={urgencyLevel}
-                    timeRemainingMinutes={data.userContext.timeRemainingMinutes}
-                    examDateSet={examDateSet}
-                  />
-                  {mappedPredictedQuestions.length > 0 && (
-                    <PredictedQuestions
-                      questions={mappedPredictedQuestions}
-                      unlockedCount={predictedUnlockedCount}
-                      totalItems={totalItems}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-4"
+                  style={{ perspective: '1000px' }}
+                >
+                  {/* Boss Battle — Red Glass Card */}
+                  <motion.div
+                    whileHover={{ y: -4, rotateX: 0 }}
+                    initial={{ rotateX: 2 }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    className="rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-950/60 to-orange-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-red-950/50"
+                  >
+                    <BossBattle
+                      bossName={data.gameStats.bossName}
+                      bossHp={data.gameStats.bossHp}
+                      bossMaxHp={data.gameStats.bossMaxHp}
+                      defeatedSections={defeatedSectionsCount}
+                      totalSections={totalSections}
                       doneCount={doneCount}
+                      totalItems={totalItems}
                     />
+                  </motion.div>
+
+                  {/* Player Stats — Dark Glass Card */}
+                  <motion.div
+                    whileHover={{ y: -4, rotateX: 0 }}
+                    initial={{ rotateX: 2 }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111118]/90 to-[#0a0a12]/90 backdrop-blur-2xl p-5 shadow-2xl shadow-black/50"
+                  >
+                    <PlayerStats
+                      playerXp={data.gameStats.playerXp}
+                      playerLevel={data.gameStats.playerLevel}
+                      streakCount={data.userContext.streakCount}
+                      urgencyLevel={urgencyLevel}
+                      timeRemainingMinutes={data.userContext.timeRemainingMinutes}
+                      examDateSet={examDateSet}
+                    />
+                  </motion.div>
+
+                  {/* Predicted Questions — Purple Glass Card */}
+                  {mappedPredictedQuestions.length > 0 && (
+                    <motion.div
+                      whileHover={{ y: -4, rotateX: 0 }}
+                      initial={{ rotateX: 2 }}
+                      style={{ transformStyle: 'preserve-3d' }}
+                      className="rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/60 to-purple-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-violet-950/50"
+                    >
+                      <PredictedQuestions
+                        questions={mappedPredictedQuestions}
+                        unlockedCount={predictedUnlockedCount}
+                        totalItems={totalItems}
+                        doneCount={doneCount}
+                      />
+                    </motion.div>
                   )}
-                  <ParentReport
-                    studentName={firstName}
-                    doneCount={doneCount}
-                    totalItems={totalItems}
-                    streakCount={data.userContext.streakCount}
-                    prioritySubjects={prioritySubjects}
-                    timeSpentMinutes={0}
-                    predictedUnlocked={predictedUnlockedCount}
-                  />
-                </div>
+
+                  {/* Parent Report — Green Glass Card */}
+                  <motion.div
+                    whileHover={{ y: -4, rotateX: 0 }}
+                    initial={{ rotateX: 2 }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/60 to-teal-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-emerald-950/50"
+                  >
+                    <ParentReport
+                      studentName={firstName}
+                      doneCount={doneCount}
+                      totalItems={totalItems}
+                      streakCount={data.userContext.streakCount}
+                      prioritySubjects={prioritySubjects}
+                      timeSpentMinutes={0}
+                      predictedUnlocked={predictedUnlockedCount}
+                    />
+                  </motion.div>
+                </motion.div>
               )}
 
-                            {/* Emergency Summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-red-500/20 bg-red-950/40 backdrop-blur-xl p-4 shadow-lg">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-red-300/80">Urgency</p>
-                  <p className="mt-2 text-lg font-black text-white capitalize">{urgencyLevel}</p>
-                  <p className="text-xs text-white/35 mt-1">Personalized by your exam date</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-lg">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Time Left</p>
-                  <p className="mt-2 text-lg font-black text-white">
-                    {data.userContext.timeRemainingMinutes === null ? 'Set exam date' : `${data.userContext.timeRemainingMinutes} min`}
-                  </p>
-                  <p className="text-xs text-white/35 mt-1">Live from your saved exam date</p>
-                </div>
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-950/40 backdrop-blur-xl p-4 shadow-lg">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-300/80">Priority Subjects</p>
-                  <p className="mt-2 text-lg font-black text-white">
-                    {prioritySubjects.length > 0 ? prioritySubjects.slice(0, 3).join(', ') : 'No weak subjects yet'}
-                  </p>
-                  <p className="text-xs text-white/35 mt-1">Top subjects to revise first</p>
-                </div>
-              </div>
+              
 
-              {/* Stats */}
-              {meta && (
-                <div className={cn('rounded-2xl p-4 flex items-center gap-4 border border-white/10', meta.bg)}>
-                  <div className={cn('p-2.5 rounded-xl border border-white/10', meta.bg)}>
-                    <ModeIcon size={18} className={meta.color} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn('text-xs font-black uppercase tracking-wider mb-0.5', meta.color)}>Source: {meta.label}</p>
-                    <p className="text-sm text-white/40">{meta.description}</p>
-                  </div>
-                </div>
-              )}
+
 
               {/* AI Tips */}
               {data.aiTips.length > 0 && <AiTipsSection tips={data.aiTips} />}
