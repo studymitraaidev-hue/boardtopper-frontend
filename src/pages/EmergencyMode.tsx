@@ -961,6 +961,19 @@ export const EmergencyModePage = () => {
   const prioritySubjects = data?.userContext.prioritySubjects ?? [];
   const urgencyColor = urgencyLevel === 'panic' ? 'text-red-400' : urgencyLevel === 'high' ? 'text-orange-400' : urgencyLevel === 'medium' ? 'text-yellow-400' : 'text-green-400';
 
+  // ── Gamification derived values ──────────────────────────────────────
+  const defeatedSectionsCount = data?.gameStats.defeatedSections.length ?? 0;
+  const totalSections = data ? Math.max(Object.keys(data.gameStats.subjectStrength).length, defeatedSectionsCount, 1) : 1;
+  const examDateSet = !!data?.userContext.examDate;
+  const mappedPredictedQuestions = (data?.likelyQuestions ?? []).map(q => ({
+    topic: q.chapter || q.subject,
+    questionType: q.type,
+    confidence: q.likelihood === 'very_high' ? 90 : q.likelihood === 'high' ? 70 : 50,
+    question: q.question,
+  }));
+  const predictedUnlockThreshold = totalItems > 0 ? Math.ceil(totalItems / 3) : 1;
+  const predictedUnlockedCount = Math.min(mappedPredictedQuestions.length, Math.floor(doneCount / predictedUnlockThreshold));
+
   // â”€â”€ Early returns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (trialExhausted) return (
@@ -1177,6 +1190,46 @@ export const EmergencyModePage = () => {
 
               {/* Countdown */}
               {countdown && <CountdownHero countdown={countdown} />}
+
+              {/* Gamified Dashboard */}
+              {data.gameStats && (
+                <div className="grid grid-cols-1 gap-3">
+                  <BossBattle
+                    bossName={data.gameStats.bossName}
+                    bossHp={data.gameStats.bossHp}
+                    bossMaxHp={data.gameStats.bossMaxHp}
+                    defeatedSections={defeatedSectionsCount}
+                    totalSections={totalSections}
+                    doneCount={doneCount}
+                    totalItems={totalItems}
+                  />
+                  <PlayerStats
+                    playerXp={data.gameStats.playerXp}
+                    playerLevel={data.gameStats.playerLevel}
+                    streakCount={data.userContext.streakCount}
+                    urgencyLevel={urgencyLevel}
+                    timeRemainingMinutes={data.userContext.timeRemainingMinutes}
+                    examDateSet={examDateSet}
+                  />
+                  {mappedPredictedQuestions.length > 0 && (
+                    <PredictedQuestions
+                      questions={mappedPredictedQuestions}
+                      unlockedCount={predictedUnlockedCount}
+                      totalItems={totalItems}
+                      doneCount={doneCount}
+                    />
+                  )}
+                  <ParentReport
+                    studentName={firstName}
+                    doneCount={doneCount}
+                    totalItems={totalItems}
+                    streakCount={data.userContext.streakCount}
+                    prioritySubjects={prioritySubjects}
+                    timeSpentMinutes={0}
+                    predictedUnlocked={predictedUnlockedCount}
+                  />
+                </div>
+              )}
 
                             {/* Emergency Summary */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
