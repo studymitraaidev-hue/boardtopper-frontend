@@ -919,6 +919,8 @@ export const EmergencyModePage = () => {
         })),
         aiTips:      Array.isArray(result.aiTips) ? result.aiTips : [],
         userContext: result.userContext,
+        gameStats:   result.gameStats,
+        likelyQuestions: Array.isArray(result.likelyQuestions) ? result.likelyQuestions : [],
       });
       setLoadState('success');
       // Mark free trial as used locally so ProGate appears next time, without a refresh
