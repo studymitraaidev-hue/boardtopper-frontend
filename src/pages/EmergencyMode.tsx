@@ -1193,85 +1193,157 @@ export const EmergencyModePage = () => {
               {/* Countdown */}
               {countdown && <CountdownHero countdown={countdown} />}
 
-              {/* Gamified Dashboard — 3D Glassmorphism */}
+              {/* ═══════════════════════════════════════════════════
+                   BATTLE ARENA — $25B Glassmorphism Dashboard
+                   ═══════════════════════════════════════════════════ */}
               {data.gameStats && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="space-y-4"
-                  style={{ perspective: '1000px' }}
-                >
-                  {/* Boss Battle — Red Glass Card */}
-                  <motion.div
-                    whileHover={{ y: -4, rotateX: 0 }}
-                    initial={{ rotateX: 2 }}
-                    style={{ transformStyle: 'preserve-3d' }}
-                    className="rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-950/60 to-orange-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-red-950/50"
-                  >
-                    <BossBattle
-                      bossName={data.gameStats.bossName}
-                      bossHp={data.gameStats.bossHp}
-                      bossMaxHp={data.gameStats.bossMaxHp}
-                      defeatedSections={defeatedSectionsCount}
-                      totalSections={totalSections}
-                      doneCount={doneCount}
-                      totalItems={totalItems}
-                    />
-                  </motion.div>
+                <div className="relative space-y-5" style={{ perspective: '1200px' }}>
+                  
+                  {/* Ambient background orbs */}
+                  <div className="absolute -top-20 -left-20 w-64 h-64 bg-red-600/10 rounded-full blur-[100px] pointer-events-none" />
+                  <div className="absolute top-40 -right-20 w-48 h-48 bg-violet-600/8 rounded-full blur-[80px] pointer-events-none" />
+                  <div className="absolute bottom-20 left-10 w-56 h-56 bg-emerald-600/6 rounded-full blur-[90px] pointer-events-none" />
 
-                  {/* Player Stats — Dark Glass Card */}
+                  {/* ═══ BOSS BATTLE — Red Neon Glass ═══ */}
                   <motion.div
-                    whileHover={{ y: -4, rotateX: 0 }}
-                    initial={{ rotateX: 2 }}
+                    initial={{ opacity: 0, y: 30, rotateX: 8 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 2 }}
+                    transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
+                    whileHover={{ 
+                      y: -8, 
+                      rotateX: 0,
+                      transition: { type: 'spring', stiffness: 300, damping: 20 }
+                    }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111118]/90 to-[#0a0a12]/90 backdrop-blur-2xl p-5 shadow-2xl shadow-black/50"
+                    className="relative group"
                   >
-                    <PlayerStats
-                      playerXp={data.gameStats.playerXp}
-                      playerLevel={data.gameStats.playerLevel}
-                      streakCount={data.userContext.streakCount}
-                      urgencyLevel={urgencyLevel}
-                      timeRemainingMinutes={data.userContext.timeRemainingMinutes}
-                      examDateSet={examDateSet}
-                    />
-                  </motion.div>
-
-                  {/* Predicted Questions — Purple Glass Card */}
-                  {mappedPredictedQuestions.length > 0 && (
-                    <motion.div
-                      whileHover={{ y: -4, rotateX: 0 }}
-                      initial={{ rotateX: 2 }}
-                      style={{ transformStyle: 'preserve-3d' }}
-                      className="rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/60 to-purple-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-violet-950/50"
-                    >
-                      <PredictedQuestions
-                        questions={mappedPredictedQuestions}
-                        unlockedCount={predictedUnlockedCount}
-                        totalItems={totalItems}
+                    {/* Glow layer */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600/40 via-orange-500/40 to-red-600/40 rounded-[2rem] blur-xl opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Card body */}
+                    <div className="relative rounded-[1.5rem] border border-red-500/30 bg-gradient-to-br from-red-950/80 via-[#1a0a0a]/90 to-orange-950/70 backdrop-blur-3xl p-5 shadow-[0_25px_60px_-15px_rgba(220,38,38,0.3)] overflow-hidden">
+                      {/* Inner highlight */}
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+                      <BossBattle
+                        bossName={data.gameStats.bossName}
+                        bossHp={data.gameStats.bossHp}
+                        bossMaxHp={data.gameStats.bossMaxHp}
+                        defeatedSections={defeatedSectionsCount}
+                        totalSections={totalSections}
                         doneCount={doneCount}
+                        totalItems={totalItems}
                       />
+                    </div>
+                  </motion.div>
+
+                  {/* ═══ PLAYER STATS — Holographic Dark Glass ═══ */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30, rotateX: 8 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 2 }}
+                    transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 100 }}
+                    whileHover={{ 
+                      y: -8, 
+                      rotateX: 0,
+                      transition: { type: 'spring', stiffness: 300, damping: 20 }
+                    }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    className="relative group"
+                  >
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/30 via-violet-500/30 to-purple-600/30 rounded-[2rem] blur-xl opacity-40 group-hover:opacity-80 transition-opacity duration-500" />
+                    <div className="relative rounded-[1.5rem] border border-white/15 bg-gradient-to-br from-[#13131f]/95 via-[#0d0d14]/95 to-[#08080f]/95 backdrop-blur-3xl p-5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                      <PlayerStats
+                        playerXp={data.gameStats.playerXp}
+                        playerLevel={data.gameStats.playerLevel}
+                        streakCount={data.userContext.streakCount}
+                        urgencyLevel={urgencyLevel}
+                        timeRemainingMinutes={data.userContext.timeRemainingMinutes}
+                        examDateSet={examDateSet}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* ═══ PREDICTED QUESTIONS — Violet Crystal ═══ */}
+                  {mappedPredictedQuestions.length > 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30, rotateX: 8 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 2 }}
+                      transition={{ duration: 0.6, delay: 0.2, type: 'spring', stiffness: 100 }}
+                      whileHover={{ 
+                        y: -8, 
+                        rotateX: 0,
+                        transition: { type: 'spring', stiffness: 300, damping: 20 }
+                      }}
+                      style={{ transformStyle: 'preserve-3d' }}
+                      className="relative group"
+                    >
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600/40 via-fuchsia-500/40 to-violet-600/40 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
+                      <div className="relative rounded-[1.5rem] border border-violet-500/30 bg-gradient-to-br from-violet-950/80 via-[#120a1a]/90 to-purple-950/70 backdrop-blur-3xl p-5 shadow-[0_25px_60px_-15px_rgba(139,92,246,0.3)] overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-400/50 to-transparent" />
+                        <PredictedQuestions
+                          questions={mappedPredictedQuestions}
+                          unlockedCount={predictedUnlockedCount}
+                          totalItems={totalItems}
+                          doneCount={doneCount}
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    /* Locked state — shows what they'll unlock */
+                    <motion.div
+                      initial={{ opacity: 0, y: 30, rotateX: 8 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 2 }}
+                      transition={{ duration: 0.6, delay: 0.2, type: 'spring', stiffness: 100 }}
+                      whileHover={{ y: -4 }}
+                      className="relative rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-[#111118]/60 to-[#0a0a12]/60 backdrop-blur-2xl p-6 text-center overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] opacity-50" />
+                      <div className="relative">
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                          <Sparkles size={20} className="text-violet-400" />
+                        </div>
+                        <p className="text-sm font-black text-white/80 mb-1">Predicted Questions Locked</p>
+                        <p className="text-xs text-white/40">Complete {predictedUnlockThreshold - doneCount} more task{predictedUnlockThreshold - doneCount !== 1 ? 's' : ''} to unlock</p>
+                        <div className="mt-3 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(100, (doneCount / predictedUnlockThreshold) * 100)}%` }}
+                            transition={{ duration: 0.8, delay: 0.5 }}
+                          />
+                        </div>
+                      </div>
                     </motion.div>
                   )}
 
-                  {/* Parent Report — Green Glass Card */}
+                  {/* ═══ PARENT REPORT — Emerald Glow ═══ */}
                   <motion.div
-                    whileHover={{ y: -4, rotateX: 0 }}
-                    initial={{ rotateX: 2 }}
+                    initial={{ opacity: 0, y: 30, rotateX: 8 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 2 }}
+                    transition={{ duration: 0.6, delay: 0.3, type: 'spring', stiffness: 100 }}
+                    whileHover={{ 
+                      y: -8, 
+                      rotateX: 0,
+                      transition: { type: 'spring', stiffness: 300, damping: 20 }
+                    }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/60 to-teal-950/40 backdrop-blur-2xl p-5 shadow-2xl shadow-emerald-950/50"
+                    className="relative group"
                   >
-                    <ParentReport
-                      studentName={firstName}
-                      doneCount={doneCount}
-                      totalItems={totalItems}
-                      streakCount={data.userContext.streakCount}
-                      prioritySubjects={prioritySubjects}
-                      timeSpentMinutes={0}
-                      predictedUnlocked={predictedUnlockedCount}
-                    />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600/40 via-teal-500/40 to-emerald-600/40 rounded-[2rem] blur-xl opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
+                    <div className="relative rounded-[1.5rem] border border-emerald-500/30 bg-gradient-to-br from-emerald-950/80 via-[#0a1a12]/90 to-teal-950/70 backdrop-blur-3xl p-5 shadow-[0_25px_60px_-15px_rgba(16,185,129,0.3)] overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+                      <ParentReport
+                        studentName={firstName}
+                        doneCount={doneCount}
+                        totalItems={totalItems}
+                        streakCount={data.userContext.streakCount}
+                        prioritySubjects={prioritySubjects}
+                        timeSpentMinutes={0}
+                        predictedUnlocked={predictedUnlockedCount}
+                      />
+                    </div>
                   </motion.div>
-                </motion.div>
+
+                </div>
               )}
 
               
