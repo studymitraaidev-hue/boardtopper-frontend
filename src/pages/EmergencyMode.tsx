@@ -1351,7 +1351,22 @@ export const EmergencyModePage = () => {
 
 
               {/* AI Tips */}
-              {data.aiTips.length > 0 && <AiTipsSection tips={data.aiTips} />}
+              {/* ═══ AI REVISION TIPS — Violet Crystal ═══ */}
+              {data.aiTips.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  whileHover={{ y: -4 }}
+                  className="relative group"
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600/30 via-purple-500/30 to-violet-600/30 rounded-[2rem] blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-500" />
+                  <div className="relative rounded-[1.5rem] border border-violet-500/20 bg-gradient-to-br from-violet-950/70 via-[#120a1a]/80 to-purple-950/60 backdrop-blur-3xl p-5 shadow-[0_20px_50px_-12px_rgba(139,92,246,0.25)] overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-400/40 to-transparent" />
+                    <AiTipsSection tips={data.aiTips} />
+                  </div>
+                </motion.div>
+              )}
 
               {/* Empty state */}
               {(data.mode === 'empty' || data.items.length === 0) ? (
@@ -1369,33 +1384,50 @@ export const EmergencyModePage = () => {
               ) : (
                 <div className="space-y-3">
 
-                  {/* Progress bar */}
-                  <div className="bg-[#111118] border border-white/10 rounded-2xl p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Flame size={15} className="text-red-400" />
-                        <span className="font-extrabold text-white text-sm">{doneCount}/{totalItems} revised</span>
+                  {/* ═══ PROGRESS — Glowing Glass Bar ═══ */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    className="relative rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-[#111118]/90 to-[#0a0a12]/90 backdrop-blur-2xl p-5 shadow-[0_15px_40px_-12px_rgba(0,0,0,0.4)] overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/20 flex items-center justify-center">
+                          <Flame size={15} className="text-red-400" />
+                        </div>
+                        <div>
+                          <span className="font-black text-white text-sm">{doneCount}/{totalItems} <span className="text-white/40 font-bold">revised</span></span>
+                          {allDone && (
+                            <motion.span 
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="ml-2 text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"
+                            >
+                              All done! 🎉
+                            </motion.span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {allDone && (
-                          <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">All done!</span>
-                        )}
-                        <button onClick={() => setFocusIndex(0)}
-                          className="flex items-center gap-1.5 text-xs font-black text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-colors">
-                          <Maximize2 size={12} /> Focused Revision
-                        </button>
-                      </div>
+                      <button onClick={() => setFocusIndex(0)}
+                        className="flex items-center gap-1.5 text-xs font-black text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl hover:bg-red-500/20 transition-colors">
+                        <Maximize2 size={12} /> Focus
+                      </button>
                     </div>
-                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-white/5 rounded-full overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-emerald-500/20 rounded-full" />
                       <motion.div
-                        className={cn('h-full rounded-full', allDone ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500')}
+                        className={cn('h-full rounded-full relative', allDone ? 'bg-gradient-to-r from-emerald-400 to-emerald-300' : 'bg-gradient-to-r from-red-500 via-orange-500 to-amber-400')}
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.6, ease: 'easeOut' }}
-                      />
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                      </motion.div>
                     </div>
-                    <p className="text-xs text-white/20">Tap to expand Â· check off when revised Â· Focused Revision for deep review</p>
-                  </div>
+                    <p className="text-xs text-white/25 mt-2.5">Tap cards to expand · Check off when revised · Focus mode for deep review</p>
+                  </motion.div>
 
                   {/* Item list with stagger */}
                   <motion.div
