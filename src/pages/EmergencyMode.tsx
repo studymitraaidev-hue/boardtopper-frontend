@@ -1078,7 +1078,7 @@ export const EmergencyModePage = () => {
             </div>
             <div>
               <h1 className="text-sm sm:text-base font-black text-white tracking-tight">Emergency Mode</h1>
-              <p className="text-[9px] text-red-100/60 uppercase tracking-widest font-bold hidden sm:block">Exam Survival Â· AI Powered</p>
+              <p className="text-[9px] text-red-100/60 uppercase tracking-widest font-bold hidden sm:block">Exam Survival · AI Powered</p>
             </div>
           </div>
           {loadState === 'success' && data && (
@@ -1176,7 +1176,7 @@ export const EmergencyModePage = () => {
               </div>
               <div className="text-center space-y-1">
                 <p className="font-black text-white">Fetching your content...</p>
-                <p className="text-xs text-white/30">Filtering academic doubts Â· Generating AI tips</p>
+                <p className="text-xs text-white/30">Filtering academic doubts · Generating AI tips</p>
               </div>
               <div className="flex gap-1.5">
                 {[0, 1, 2].map(i => (
