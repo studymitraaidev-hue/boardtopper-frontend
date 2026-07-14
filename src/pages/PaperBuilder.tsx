@@ -48,7 +48,7 @@ export default function PaperBuilder() {
       });
       
       console.log('[PaperBuilder] Build response:', res.data);
-      const paper = res.data?.data?.paper || res.data?.paper;
+      const paper = res?.paper;
       
       if (!paper) {
         throw new Error('No paper data in response');

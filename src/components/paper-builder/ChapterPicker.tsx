@@ -28,7 +28,7 @@ export default function ChapterPicker({ subjectId, subjectName, bossName, onBack
   useEffect(() => {
     api.get(`/chapters?subject=${subjectId}`)
       .then((res: any) => {
-        const data = res.data?.data || res.data || [];
+        const data = res || [];
         setChapters(Array.isArray(data) ? data : []);
       })
       .catch((err: any) => {

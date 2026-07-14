@@ -41,7 +41,7 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
     api.get('/papers/subjects')
       .then((res: any) => {
         console.log('[BossSelect] API response:', res.data);
-        const data = res.data?.data?.subjects || res.data?.subjects || [];
+        const data = res?.subjects || [];
         if (Array.isArray(data) && data.length > 0) {
           setSubjects(data);
         } else {
