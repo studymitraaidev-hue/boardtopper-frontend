@@ -2,13 +2,14 @@
 // src/components/premium/BottomNav.tsx
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageCircle, BookOpen, Trophy, Zap, Settings } from 'lucide-react';
+import { LayoutDashboard, MessageCircle, BookOpen, Trophy, Zap, Settings, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/doubt', label: 'Doubt', icon: MessageCircle },
   { path: '/notes', label: 'Notes', icon: BookOpen },
+  { path: '/arena', label: 'Arena', icon: Swords },
   { path: '/test', label: 'Test', icon: Trophy },
   { path: '/top-qs', label: 'Top Qs', icon: Zap },
   { path: '/settings', label: 'Settings', icon: Settings },

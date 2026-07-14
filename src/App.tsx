@@ -21,6 +21,7 @@ const EmergencyModePage = lazy(() => import('./pages/EmergencyMode'));
 const MyNotes           = lazy(() => import('./pages/MyNotes'));
 const Settings          = lazy(() => import('./pages/Settings'));
 const LikelyQuestions  = lazy(() => import('./pages/LikelyQuestions'));
+const PaperBuilder     = lazy(() => import('./pages/PaperBuilder'));
 const VerifyEmail       = lazy(() => import('./pages/VerifyEmail'));
 
 // Policy pages
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/my-notes"     element={<MyNotes />} />
                 <Route path="/settings"     element={<Settings />} />
                 <Route path="/likely-questions" element={<LikelyQuestions />} />
+                <Route path="/arena"              element={<PaperBuilder />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

@@ -6,7 +6,8 @@ import { useDashboard } from '../../hooks/useDashboard';
 import {
   LayoutDashboard, MessageSquare, FileText, ClipboardList,
   Zap, GraduationCap, LogOut, Crown, ChevronRight, TrendingUp, Bell, BookMarked,
-  Settings
+  Settings,
+  Swords
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
   { name: 'Doubt Solver',     icon: MessageSquare,   path: '/doubt-solver'   },
   { name: 'Smart Notes',      icon: FileText,        path: '/notes'         },
   { name: 'My Notes',         icon: BookMarked,      path: '/my-notes'      },
+  { name: 'Final Boss Arena', icon: Swords,          path: '/arena'         },
   { name: 'Exam Simulation',  icon: ClipboardList,   path: '/simulation'    },
   { name: 'Likely Questions', icon: TrendingUp,      path: '/likely-questions' },
   { name: 'Emergency Mode',   icon: Zap,             path: '/emergency', special: true },

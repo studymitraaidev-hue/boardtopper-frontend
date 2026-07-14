@@ -5,13 +5,14 @@ import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import {
   Sparkles, Menu, X, GraduationCap, ShieldCheck,
-  Zap, ChevronDown, BookOpen, MessageSquare, ClipboardList, LayoutDashboard
+  Zap, ChevronDown, BookOpen, MessageSquare, ClipboardList, LayoutDashboard, Swords
 } from 'lucide-react';
 
 const PRODUCTS = [
   { name: 'Study Dashboard',  desc: 'Track your progress daily',          icon: LayoutDashboard, path: '/dashboard',    color: 'text-blue-600',   bg: 'bg-blue-50'    },
   { name: 'AI Doubt Solver',  desc: 'Instant step-by-step solutions',     icon: MessageSquare,   path: '/doubt-solver', color: 'text-violet-600', bg: 'bg-violet-50'  },
   { name: 'Smart Notes',      desc: 'Board-focused chapter summaries',     icon: BookOpen,        path: '/notes',        color: 'text-emerald-600',bg: 'bg-emerald-50' },
+  { name: 'Final Boss Arena', desc: 'Real board exam boss battles',       icon: Swords,          path: '/arena',        color: 'text-red-600',    bg: 'bg-red-50'     },
   { name: 'Exam Simulation',  desc: 'Timed mock tests with AI marking',    icon: ClipboardList,   path: '/simulation',   color: 'text-amber-600',  bg: 'bg-amber-50'   },
   { name: 'Emergency Mode',   desc: 'Crash prep for tomorrow\'s exam',     icon: Zap,             path: '/emergency',    color: 'text-red-600',    bg: 'bg-red-50'     },
 ];
