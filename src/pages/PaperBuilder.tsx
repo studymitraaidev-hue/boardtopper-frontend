@@ -47,11 +47,19 @@ export default function PaperBuilder() {
         mode: paperData.mode,
       });
       
-      setPaperData({ ...paperData, paper: res.data.data.paper });
+      console.log('[PaperBuilder] Build response:', res.data);
+      const paper = res.data?.data?.paper || res.data?.paper;
+      
+      if (!paper) {
+        throw new Error('No paper data in response');
+      }
+      
+      setPaperData({ ...paperData, paper });
       setScreen('battle');
-    } catch (err) {
-      console.error('Failed to build paper:', err);
-      alert('Failed to assemble paper. Please try again.');
+    } catch (err: any) {
+      console.error('[PaperBuilder] Failed to build paper:', err?.response?.status, err?.message);
+      const msg = err?.response?.data?.message || err?.message || 'Failed to assemble paper';
+      alert(msg + '. Please try again or select different chapters.');
     } finally {
       setLoading(false);
     }

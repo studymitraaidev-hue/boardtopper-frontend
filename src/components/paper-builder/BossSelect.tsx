@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Zap, ChevronRight, Trophy, Timer, Target } from 'lucide-react';
+import { Lock, Zap, ChevronRight, Trophy, Timer, Target, AlertTriangle, RefreshCw } from 'lucide-react';
 import { api } from '../../utils/api';
 
 interface BossSubject {
@@ -13,21 +13,52 @@ interface BossSubject {
 
 interface BossSelectProps {
   onSelectBoss: (subjectId: string, subjectName: string, bossName: string) => void;
-
   tasksDone?: number;
   totalTasks?: number;
 }
 
+// Fallback data so the UI NEVER stays empty
+const FALLBACK_SUBJECTS: BossSubject[] = [
+  { id: 'algebra', name: 'Algebra', emoji: '📐', boss: 'Algebra Dragon', available: true },
+  { id: 'geometry', name: 'Geometry', emoji: '📏', boss: 'Geometry Titan', available: true },
+  { id: 'science1', name: 'Science Part 1', emoji: '⚗️', boss: 'Physics Phantom', available: true },
+  { id: 'science2', name: 'Science Part 2', emoji: '🌿', boss: 'Bio Beast', available: true },
+  { id: 'english', name: 'English', emoji: '📖', boss: 'Literature Leviathan', available: true },
+  { id: 'history', name: 'History & Pol Sc', emoji: '🏛️', boss: 'History Hydra', available: false },
+  { id: 'geography', name: 'Geography', emoji: '🌍', boss: 'Geo Golem', available: false },
+];
+
 export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1 }: BossSelectProps) {
   const [subjects, setSubjects] = useState<BossSubject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchSubjects = () => {
+    setLoading(true);
+    setError(null);
+    
     api.get('/papers/subjects')
-      .then((res: any) => setSubjects(res.data.data.subjects))
-      .catch(() => setSubjects([]))
+      .then((res: any) => {
+        console.log('[BossSelect] API response:', res.data);
+        const data = res.data?.data?.subjects || res.data?.subjects || [];
+        if (Array.isArray(data) && data.length > 0) {
+          setSubjects(data);
+        } else {
+          console.warn('[BossSelect] API returned empty, using fallback');
+          setSubjects(FALLBACK_SUBJECTS);
+        }
+      })
+      .catch((err: any) => {
+        console.error('[BossSelect] API failed:', err?.response?.status, err?.message);
+        setError(err?.response?.data?.message || 'Failed to load arena data');
+        setSubjects(FALLBACK_SUBJECTS);
+      })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSubjects();
   }, []);
 
   const progressPct = Math.min((tasksDone / totalTasks) * 100, 100);
@@ -93,7 +124,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
             <div className="text-gray-600 text-xs uppercase tracking-wider">Boss weakened</div>
           </div>
         </div>
-        {/* Progress bar */}
         <div className="mt-4 h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
@@ -103,6 +133,27 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
           />
         </div>
       </motion.div>
+
+      {/* Error Banner */}
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 flex items-center gap-3"
+        >
+          <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-red-400 text-sm font-medium">{error}</p>
+            <p className="text-red-400/60 text-xs">Using cached data. Some features may be limited.</p>
+          </div>
+          <button 
+            onClick={fetchSubjects}
+            className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </motion.div>
+      )}
 
       {/* Boss Cards */}
       <div className="space-y-3">
@@ -139,13 +190,11 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
                     transformStyle: 'preserve-3d'
                   }}
                 >
-                  {/* Ambient glow on hover */}
                   {hovered && !locked && (
                     <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-red-500/20 via-orange-500/10 to-transparent blur-sm" />
                   )}
 
                   <div className="relative p-5 flex items-center gap-5">
-                    {/* Boss Avatar */}
                     <div className="relative">
                       <div className={`
                         w-16 h-16 rounded-2xl flex items-center justify-center text-3xl
@@ -164,7 +213,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
                       )}
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className={`font-bold text-base truncate ${locked ? 'text-gray-600' : 'text-white'}`}>
@@ -176,7 +224,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
                         {subject.name}
                       </p>
 
-                      {/* HP Bar */}
                       {!locked && (
                         <div className="mt-3 space-y-1">
                           <div className="flex justify-between text-xs">
@@ -200,7 +247,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
                       )}
                     </div>
 
-                    {/* Action */}
                     <div className={`
                       w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                       transition-all duration-300
@@ -215,7 +261,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
                     </div>
                   </div>
 
-                  {/* Bottom stats strip */}
                   {!locked && (
                     <div className="relative px-5 pb-4 pt-0 flex gap-4">
                       <div className="flex items-center gap-1.5 text-xs text-gray-500">

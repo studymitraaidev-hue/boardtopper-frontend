@@ -27,8 +27,14 @@ export default function ChapterPicker({ subjectId, subjectName, bossName, onBack
 
   useEffect(() => {
     api.get(`/chapters?subject=${subjectId}`)
-      .then((res: any) => setChapters(res.data.data || []))
-      .catch(() => setChapters([]))
+      .then((res: any) => {
+        const data = res.data?.data || res.data || [];
+        setChapters(Array.isArray(data) ? data : []);
+      })
+      .catch((err: any) => {
+        console.error('[ChapterPicker] Failed:', err?.response?.status, err?.message);
+        setChapters([]);
+      })
       .finally(() => setLoading(false));
   }, [subjectId]);
 
