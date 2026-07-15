@@ -49,7 +49,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
         }
       })
       .catch((err: any) => {
-        setDebugInfo('CATCH: ' + (err?.message || 'Unknown error'));
         setError(err?.message || 'Failed to load arena data');
         setSubjects(FALLBACK_SUBJECTS);
       })
