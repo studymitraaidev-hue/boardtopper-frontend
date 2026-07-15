@@ -33,7 +33,6 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>("");
 
   const fetchSubjects = () => {
     setLoading(true);
@@ -41,13 +40,11 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
     
     api.get('/api/papers/subjects')
       .then((res: any) => {
-        setDebugInfo('THEN: ' + JSON.stringify(res).slice(0, 150));
         const data = res?.subjects || res?.data?.subjects || [];
         if (Array.isArray(data) && data.length > 0) {
           setSubjects(data);
           setError(null);
         } else {
-          setDebugInfo('EMPTY: ' + JSON.stringify(res).slice(0, 150));
           setSubjects(FALLBACK_SUBJECTS);
         }
       })
@@ -157,11 +154,7 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
         </motion.div>
       )}
 
-      {debugInfo && (
-        <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-2 mb-4">
-          <p className="text-yellow-400 text-[10px] font-mono break-all">{debugInfo}</p>
-        </div>
-      )}
+
 
       {/* Boss Cards */}
       <div className="space-y-3">

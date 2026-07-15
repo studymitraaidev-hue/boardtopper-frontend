@@ -84,7 +84,7 @@ export default function ChapterPicker({ subjectId, subjectName, bossName, onBack
     setLoading(true);
     setError(null);
     
-    api.get(`/api/chapters?subject=${subjectId}`)
+    api.get(`/api/subjects/${subjectId}/chapters`)
       .then((res: any) => {
         console.log('[ChapterPicker] API response:', res);
         const data = res || [];
