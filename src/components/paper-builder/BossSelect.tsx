@@ -39,7 +39,7 @@ export default function BossSelect({ onSelectBoss, tasksDone = 0, totalTasks = 1
     setLoading(true);
     setError(null);
     
-    api.get('/papers/subjects')
+    api.get('/api/papers/subjects')
       .then((res: any) => {
         setDebugInfo('THEN: ' + JSON.stringify(res).slice(0, 150));
         const data = res?.subjects || res?.data?.subjects || [];

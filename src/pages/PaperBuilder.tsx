@@ -41,7 +41,7 @@ export default function PaperBuilder() {
     setLoading(true);
     
     try {
-      const res: any = await api.post('/papers/build', {
+      const res: any = await api.post('/api/papers/build', {
         subjectId: paperData.subjectId,
         chapterIds,
         mode: paperData.mode,
