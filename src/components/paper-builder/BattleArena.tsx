@@ -49,6 +49,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
   const [playerHp, setPlayerHp] = useState(100);
   const [bossHp, setBossHp] = useState(paper.bossHp);
   const [combo, setCombo] = useState(0);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [phase, setPhase] = useState<'reading' | 'battle' | 'victory' | 'defeat'>('reading');
   const [hitEffect, setHitEffect] = useState<'player' | 'boss' | null>(null);
@@ -85,11 +86,11 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const handleAnswer = (answer: string) => {
+  const handleAnswer = (answer: string, optionIndex?: number) => {
     if (!question) return;
     
     const qKey = `${currentSectionIdx}-${currentQuestionIdx}`;
-    const isCorrect = checkAnswer(answer, question);
+    const isCorrect = checkAnswer(answer, question, optionIndex);
     
     setAnswers(prev => ({ ...prev, [qKey]: answer }));
     
@@ -332,7 +333,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
                     key={i}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleAnswer(opt)}
+                    onClick={() => handleAnswer(opt, i)}
                     className="w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/30 hover:bg-red-950/10 transition-all text-gray-300 hover:text-white"
                   >
                     <span className="inline-block w-8 h-8 rounded-lg bg-white/5 text-center leading-8 text-sm font-bold mr-3 text-gray-500">
