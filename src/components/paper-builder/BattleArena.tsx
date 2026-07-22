@@ -11,6 +11,10 @@ interface PaperQuestion {
   answerHint: string;
   source: 'pyq' | 'ai';
   options?: string[];
+  correctIndex?: number;
+  chapterId?: string;
+  subjectId?: string;
+  appearedYears?: number[];
 }
 
 interface PaperSection {
@@ -88,8 +92,12 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
 
   const handleAnswer = (answer: string, optionIndex?: number) => {
     if (!question) return;
+    if (optionIndex !== undefined) setSelectedOptionIndex(optionIndex);
     
     const qKey = `${currentSectionIdx}-${currentQuestionIdx}`;
+    if (optionIndex !== undefined) {
+      setSelectedOptions(prev => ({ ...prev, [qKey]: optionIndex }));
+    }
     const isCorrect = checkAnswer(answer, question, optionIndex);
     
     setAnswers(prev => ({ ...prev, [qKey]: answer }));
@@ -122,13 +130,13 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     }, 400);
   };
 
-  const checkAnswer = (answer: string, q: PaperQuestion): boolean => {
-    // For demo: MCQ with options — assume first option is correct for now
-    // In production: compare against stored correct answer
-    if (q.type === 'mcq' && q.options) {
-      return q.options[0] === answer;
+  const checkAnswer = (answer: string, q: PaperQuestion, optionIndex?: number): boolean => {
+    if (q.type === 'mcq' && q.options && q.options.length > 0) {
+      if (q.correctIndex !== undefined) {
+        return optionIndex === q.correctIndex;
+      }
+      return answer === q.options[0]; // fallback
     }
-    // For subjective: any non-empty answer is "correct" (self-graded later)
     return answer.trim().length > 0;
   };
 
@@ -137,7 +145,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     paper.sections.forEach((sec, si) => {
       sec.questions.forEach((q, qi) => {
         const key = `${si}-${qi}`;
-        if (answers[key] && checkAnswer(answers[key], q)) {
+        if (answers[key] && checkAnswer(answers[key], q, selectedOptions[key])) {
           score += q.marks;
         }
       });
