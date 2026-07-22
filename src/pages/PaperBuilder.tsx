@@ -4,9 +4,10 @@ import BossSelect from '../components/paper-builder/BossSelect';
 import ChapterPicker from '../components/paper-builder/ChapterPicker';
 import BattleArena from '../components/paper-builder/BattleArena';
 import BattleResult from '../components/paper-builder/BattleResult';
+import ReviewScreen from '../components/paper-builder/ReviewScreen';
 import { api } from '../utils/api';
 
-type Screen = 'boss-select' | 'mode-select' | 'chapter-pick' | 'battle' | 'result';
+type Screen = 'boss-select' | 'mode-select' | 'chapter-pick' | 'battle' | 'review' | 'result';
 
 interface PaperData {
   subjectId: string;
@@ -20,6 +21,11 @@ export default function PaperBuilder() {
   const [screen, setScreen] = useState<Screen>('boss-select');
   const [paperData, setPaperData] = useState<PaperData | null>(null);
   const [result, setResult] = useState<{ score: number; totalMarks: number } | null>(null);
+  const [reviewData, setReviewData] = useState<{
+    answers: Record<string, string>;
+    selectedOptions: Record<string, number>;
+    paper: any;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Step 1: Boss selected
@@ -66,8 +72,13 @@ export default function PaperBuilder() {
   };
 
   // Step 4: Battle complete
-  const handleBattleComplete = (score: number, totalMarks: number) => {
+  const handleBattleComplete = (score: number, totalMarks: number, answers: Record<string, string>, selectedOptions: Record<string, number>) => {
     setResult({ score, totalMarks });
+    setReviewData({ answers, selectedOptions, paper: paperData?.paper });
+    setScreen('review');
+  };
+
+  const handleReviewComplete = () => {
     setScreen('result');
   };
 
@@ -202,6 +213,21 @@ export default function PaperBuilder() {
             <BattleArena
               paper={paperData.paper}
               onComplete={handleBattleComplete}
+            />
+          </motion.div>
+        )}
+
+        {screen === 'review' && reviewData && paperData && (
+          <motion.div
+            key="review"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <ReviewScreen
+              paper={reviewData.paper}
+              answers={reviewData.answers}
+              selectedOptions={reviewData.selectedOptions}
+              onComplete={handleReviewComplete}
             />
           </motion.div>
         )}

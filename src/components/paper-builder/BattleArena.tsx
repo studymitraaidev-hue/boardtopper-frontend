@@ -41,7 +41,7 @@ interface BuiltPaper {
 
 interface BattleArenaProps {
   paper: BuiltPaper;
-  onComplete: (score: number, totalMarks: number) => void;
+  onComplete: (score: number, totalMarks: number, answers: Record<string, string>, selectedOptions: Record<string, number>) => void;
 
 }
 
@@ -53,7 +53,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
   const [playerHp, setPlayerHp] = useState(100);
   const [bossHp, setBossHp] = useState(paper.bossHp);
   const [combo, setCombo] = useState(0);
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
   const [showHint, setShowHint] = useState(false);
   const [phase, setPhase] = useState<'reading' | 'battle' | 'victory' | 'defeat'>('reading');
   const [hitEffect, setHitEffect] = useState<'player' | 'boss' | null>(null);
@@ -92,7 +92,6 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
 
   const handleAnswer = (answer: string, optionIndex?: number) => {
     if (!question) return;
-    if (optionIndex !== undefined) setSelectedOptionIndex(optionIndex);
     
     const qKey = `${currentSectionIdx}-${currentQuestionIdx}`;
     if (optionIndex !== undefined) {
@@ -158,7 +157,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
       setPhase('defeat');
     }
     
-    setTimeout(() => onComplete(score, paper.totalMarks), 2000);
+    setTimeout(() => onComplete(score, paper.totalMarks, answers, selectedOptions), 2000);
   };
 
   const handleSkip = () => {
