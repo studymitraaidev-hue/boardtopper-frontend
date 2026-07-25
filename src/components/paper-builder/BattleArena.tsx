@@ -57,6 +57,7 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
   const [showHint, setShowHint] = useState(false);
   const [phase, setPhase] = useState<'reading' | 'battle' | 'victory' | 'defeat'>('reading');
   const [hitEffect, setHitEffect] = useState<'player' | 'boss' | null>(null);
+  const [keywordFeedback, setKeywordFeedback] = useState<{matched: string[]; missed: string[]; score: number} | null>(null);
 
   const section = paper.sections[currentSectionIdx];
   const question = section?.questions[currentQuestionIdx];
@@ -99,6 +100,14 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     }
     const isCorrect = checkAnswer(answer, question, optionIndex);
     
+    // Show keyword feedback for subjective questions
+    if (question.type !== 'mcq') {
+      const fb = getSubjectiveFeedback(answer, question);
+      setKeywordFeedback(fb);
+    } else {
+      setKeywordFeedback(null);
+    }
+
     setAnswers(prev => ({ ...prev, [qKey]: answer }));
     
     if (isCorrect) {
@@ -129,6 +138,27 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     }, 400);
   };
 
+  // Extract keywords from answerHint for subjective grading
+  const extractKeywords = (hint: string): string[] => {
+    if (!hint) return [];
+    // Split by common delimiters and filter for meaningful words
+    const words = hint.toLowerCase()
+      .split(/[\n,;:.!?\-]+/)
+      .map(w => w.trim())
+      .filter(w => w.length > 3 && !['this', 'that', 'with', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'time', 'will', 'about', 'could', 'other', 'after', 'first', 'never', 'these', 'think', 'where', 'being', 'every', 'great', 'might', 'shall', 'while', 'should', 'through', 'between', 'without', 'another', 'because', 'however', 'therefore', 'something'].includes(w));
+    // Remove duplicates
+    return [...new Set(words)].slice(0, 8);
+  };
+
+  // Fuzzy keyword match: returns 0-1 score based on how many keywords matched
+  const keywordMatchScore = (answer: string, hint: string): number => {
+    const keywords = extractKeywords(hint);
+    if (keywords.length === 0) return 0.5; // No hint = neutral
+    const answerLower = answer.toLowerCase();
+    const matched = keywords.filter(kw => answerLower.includes(kw));
+    return matched.length / keywords.length;
+  };
+
   const checkAnswer = (answer: string, q: PaperQuestion, optionIndex?: number): boolean => {
     if (q.type === 'mcq' && q.options && q.options.length > 0) {
       if (q.correctIndex !== undefined) {
@@ -136,7 +166,18 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
       }
       return answer === q.options[0]; // fallback
     }
-    return answer.trim().length > 0;
+    // Subjective: need at least 50% keyword match to count as "correct" in battle
+    const score = keywordMatchScore(answer, q.answerHint || '');
+    return score >= 0.5;
+  };
+
+  const getSubjectiveFeedback = (answer: string, q: PaperQuestion): { score: number; matched: string[]; missed: string[] } => {
+    const keywords = extractKeywords(q.answerHint || '');
+    const answerLower = answer.toLowerCase();
+    const matched = keywords.filter(kw => answerLower.includes(kw));
+    const missed = keywords.filter(kw => !answerLower.includes(kw));
+    const score = keywords.length > 0 ? matched.length / keywords.length : 0.5;
+    return { score, matched, missed };
   };
 
   const calculateFinalScore = () => {
@@ -355,20 +396,55 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
             {/* Subjective Answer */}
             {(question.type === 'short' || question.type === 'long' || question.type === 'very_short') && (
               <div className="space-y-4">
+                <div className="text-xs text-gray-500 mb-1">
+                  {question.type === 'very_short' ? 'Answer in 1-2 sentences' : question.type === 'short' ? 'Answer briefly (2-3 sentences)' : 'Answer in detail with keywords'}
+                </div>
                 <textarea
-                  placeholder="Type your answer here..."
-                  className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:border-red-500/30 focus:outline-none resize-none"
-                  onBlur={(e) => handleAnswer(e.target.value)}
+                  id="subjective-answer"
+                  placeholder="Type your answer with key terms from the chapter..."
+                  className="w-full h-28 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:border-red-500/30 focus:outline-none resize-none text-sm leading-relaxed"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      const ta = document.getElementById('subjective-answer') as HTMLTextAreaElement;
+                      if (ta) handleAnswer(ta.value);
+                    }
+                  }}
                 />
                 <button
                   onClick={() => {
-                    const ta = document.querySelector('textarea');
+                    const ta = document.getElementById('subjective-answer') as HTMLTextAreaElement;
                     if (ta) handleAnswer(ta.value);
                   }}
                   className="w-full py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-xl"
                 >
                   Submit Answer
                 </button>
+
+                {/* Keyword Feedback */}
+                {keywordFeedback && (
+                  <div className="space-y-2 mt-2">
+                    {keywordFeedback.matched.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs text-green-400 font-medium">Matched:</span>
+                        {keywordFeedback.matched.map((k, i) => (
+                          <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">{k}</span>
+                        ))}
+                      </div>
+                    )}
+                    {keywordFeedback.missed.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs text-red-400 font-medium">Missing:</span>
+                        {keywordFeedback.missed.map((k, i) => (
+                          <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">{k}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500">
+                      Keyword match: {Math.round(keywordFeedback.score * 100)}%
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
