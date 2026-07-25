@@ -53,8 +53,8 @@ export default function PaperBuilder() {
         mode: paperData.mode,
       });
       
-      console.log('[PaperBuilder] Build response:', res.data);
-      const paper = res.data?.paper;
+      console.log('[PaperBuilder] Build response:', res);
+      const paper = res?.paper;
       
       if (!paper) {
         throw new Error('No paper data in response');
