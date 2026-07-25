@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { api } from '../../utils/api';
 import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle, ChevronRight, BookOpen, Award, ArrowRight } from 'lucide-react';
 
@@ -126,6 +127,38 @@ export default function ReviewScreen({ paper, answers, selectedOptions, onComple
 
   const getPercentage = () => {
     return Math.round((getTotalReviewScore() / paper.totalMarks) * 100);
+  };
+
+  const submitSelfChecks = async () => {
+    const checks = allQuestions.map(({ question, key }) => {
+      const marksPossible = question.marks;
+      let marksAwarded = 0;
+      if (question.type === 'mcq') {
+        marksAwarded = isMCQCorrect(question, key) ? marksPossible : 0;
+      } else {
+        marksAwarded = subjectiveScores[key] ?? 0;
+      }
+      return {
+        questionId: question.id,
+        marksAwarded,
+        marksPossible,
+      };
+    });
+
+    try {
+      await api.post('/api/self-checks', {
+        subjectId: paper.subjectId,
+        checks,
+      });
+      console.log('[ReviewScreen] Self-checks submitted');
+    } catch (err) {
+      console.error('[ReviewScreen] Failed to submit self-checks:', err);
+    }
+  };
+
+  const handleFinish = async () => {
+    await submitSelfChecks();
+    onComplete();
   };
 
   if (!currentQ) return null;
@@ -298,7 +331,7 @@ export default function ReviewScreen({ paper, answers, selectedOptions, onComple
             </button>
           ) : (
             <button
-              onClick={onComplete}
+              onClick={handleFinish}
               className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-lg flex items-center gap-2 transition-colors"
             >
               Finish Review <ArrowRight className="w-4 h-4" />
