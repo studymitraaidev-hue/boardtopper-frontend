@@ -128,7 +128,7 @@ export default function SmartEmergency() {
 
   useEffect(() => {
     let cancelled = false;
-    api.get(`/emergency/smart?hoursLeft=${hoursLeft}&subjectId=${subjectId}`)
+    api.get(`/api/emergency/smart?hoursLeft=${hoursLeft}&subjectId=${subjectId}`)
       .then((res: any) => {
         if (cancelled) return;
         setData(res);
