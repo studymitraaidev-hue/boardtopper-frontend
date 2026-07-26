@@ -579,7 +579,7 @@ export default function Settings() {
                     <div className="h-4 bg-slate-100 rounded animate-pulse" />
                     <div className="h-4 bg-slate-100 rounded animate-pulse w-2/3" />
                   </div>
-                ) : (subscriptionStatus.isPro || user?.plan === 'pro') ? (
+                ) : (subscriptionStatus.isPro) ? (
                   /* Pro user */
                   <div>
                     <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full px-3 py-1 text-xs font-bold">

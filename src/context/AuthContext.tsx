@@ -179,7 +179,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     await fetchSubscription();
   }
 
-  const isPro = subscriptionStatus?.isPro === true || user?.plan === 'pro';
+  const isPro = subscriptionStatus?.isPro === true;
 
   return (
     <AuthContext.Provider
