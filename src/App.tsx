@@ -17,7 +17,7 @@ const PricingPage       = lazy(() => import('./pages/Pricing'));
 const ForgotPassword    = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword     = lazy(() => import('./pages/ResetPassword'));
 const AuthCallback      = lazy(() => import('./pages/AuthCallback'));
-const EmergencyModePage = lazy(() => import('./pages/EmergencyMode'));
+const SmartEmergencyPage = lazy(() => import('./pages/SmartEmergency'));
 const MyNotes           = lazy(() => import('./pages/MyNotes'));
 const Settings          = lazy(() => import('./pages/Settings'));
 const LikelyQuestions  = lazy(() => import('./pages/LikelyQuestions'));
@@ -64,7 +64,7 @@ function App() {
                 <Route path="/doubt-solver" element={<DoubtSolver />} />
                 <Route path="/notes"        element={<NotesGenerator />} />
                 <Route path="/simulation"   element={<ExamSimulation />} />
-                <Route path="/emergency"    element={<EmergencyModePage />} />
+                <Route path="/emergency"    element={<SmartEmergencyPage />} />
                 <Route path="/my-notes"     element={<MyNotes />} />
                 <Route path="/settings"     element={<Settings />} />
                 <Route path="/likely-questions" element={<LikelyQuestions />} />
