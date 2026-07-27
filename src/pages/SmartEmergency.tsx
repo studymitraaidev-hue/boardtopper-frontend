@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../utils/api';
 import ExamDateGate from '../components/ExamDateGate';
-import { Loader2, AlertTriangle, Clock, BookOpen, Target, TrendingDown, TrendingUp, Zap, ChevronRight, Calendar, Flame } from 'lucide-react';
+import { Loader2, AlertTriangle, Clock, BookOpen, Target, TrendingDown, TrendingUp, Zap, Calendar, Flame } from 'lucide-react';
 
 interface ChapterWeakness {
   chapterId: string;
@@ -144,6 +144,29 @@ export default function SmartEmergency() {
   }, [hoursLeft, subjectId]);
 
   const [examDate, setExamDate] = useState<string | null>(data?.userContext?.examDate ?? null);
+  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+
+  // Load checked items from localStorage
+  useEffect(() => {
+    if (data?.checklist) {
+      const key = `smart_emergency_checked_${data.userContext?.name || 'default'}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const indices = JSON.parse(saved) as number[];
+          setCheckedItems(new Set(indices));
+        } catch { /* ignore */ }
+      }
+    }
+  }, [data?.checklist]);
+
+  // Save checked items to localStorage
+  useEffect(() => {
+    if (data?.checklist && checkedItems.size > 0) {
+      const key = `smart_emergency_checked_${data.userContext?.name || 'default'}`;
+      localStorage.setItem(key, JSON.stringify(Array.from(checkedItems)));
+    }
+  }, [checkedItems, data?.checklist, data?.userContext?.name]);
 
   // Show exam date gate if no date set
   if (!examDate && !loading && !error) {
@@ -363,26 +386,72 @@ export default function SmartEmergency() {
         {/* Checklist */}
         {checklist.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="w-5 h-5 text-blue-500" />
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Study Checklist</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-blue-500" />
+                <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Study Checklist</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">{checkedItems.size}/{checklist.length} done</span>
+                {checkedItems.size > 0 && (
+                  <button
+                    onClick={() => setCheckedItems(new Set())}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
-              {checklist.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 transition">
-                  <ChevronRight className={`w-4 h-4 mt-0.5 shrink-0 ${item.priority === 'high' ? 'text-red-500' : 'text-gray-400'}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.content}</p>
+              {checklist.map((item, i) => {
+                const isChecked = checkedItems.has(i);
+                return (
+                  <div
+                    key={i}
+                    onClick={() => {
+                      setCheckedItems(prev => {
+                        const next = new Set(prev);
+                        isChecked ? next.delete(i) : next.add(i);
+                        return next;
+                      });
+                    }}
+                    className={`flex items-start gap-3 px-3 py-2.5 rounded-lg border transition cursor-pointer ${
+                      isChecked
+                        ? 'border-green-200 bg-green-50'
+                        : 'border-gray-100 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
+                      isChecked
+                        ? 'bg-green-500 border-green-500'
+                        : 'border-gray-300 bg-white'
+                    }`}>
+                      {isChecked && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${isChecked ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{item.title}</p>
+                      <p className={`text-xs mt-0.5 ${isChecked ? 'text-gray-300' : 'text-gray-500'}`}>{item.content}</p>
+                    </div>
+                    {item.tag && !isChecked && (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${item.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {item.tag}
+                      </span>
+                    )}
+                    {isChecked && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
+                        Done
+                      </span>
+                    )}
                   </div>
-                  {item.tag && (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${item.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
-                      {item.tag}
-                    </span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
+            {checkedItems.size === checklist.length && (
+              <div className="mt-4 text-center">
+                <p className="text-sm font-semibold text-green-600">All tasks completed! Great job!</p>
+              </div>
+            )}
           </div>
         )}
 
