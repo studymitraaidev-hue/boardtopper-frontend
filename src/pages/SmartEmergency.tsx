@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../utils/api';
+import ExamDateGate from '../components/ExamDateGate';
 import { Loader2, AlertTriangle, Clock, BookOpen, Target, TrendingDown, TrendingUp, Zap, ChevronRight, Calendar, Flame } from 'lucide-react';
 
 interface ChapterWeakness {
@@ -141,6 +142,27 @@ export default function SmartEmergency() {
       });
     return () => { cancelled = true; };
   }, [hoursLeft, subjectId]);
+
+  const [examDate, setExamDate] = useState<string | null>(data?.userContext?.examDate ?? null);
+
+  // Show exam date gate if no date set
+  if (!examDate && !loading && !error) {
+    return (
+      <ExamDateGate
+        userName={data?.userContext?.name || 'Student'}
+        onDateSet={(date) => {
+          if (date) {
+            setExamDate(date);
+            // Refresh data with new exam date
+            window.location.reload();
+          } else {
+            // Skip - show dashboard anyway
+            setExamDate('skipped');
+          }
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
