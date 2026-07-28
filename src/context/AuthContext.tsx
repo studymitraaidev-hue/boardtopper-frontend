@@ -92,11 +92,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setUser(JSON.parse(raw) as AuthUser);
 
         try {
-          const result = await api.get<{ user: Record<string, unknown> }>('/api/auth/me');
-          const freshUser = mapUser(result.user);
-          localStorage.setItem('bt_user', JSON.stringify(freshUser));
-          setUser(freshUser);
-          await fetchSubscription();
+          // FIX: Run auth + subscription in parallel
+          const [result] = await Promise.all([
+            api.get<{ user: Record<string, unknown> }>('/api/auth/me'),
+            fetchSubscription()
+          ]);
         } catch {
           localStorage.removeItem('bt_token');
           localStorage.removeItem('bt_user');
