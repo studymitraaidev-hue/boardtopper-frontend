@@ -9,12 +9,12 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { cn } from '../utils/cn';
 import {
-import WhatsAppShare from '../components/WhatsAppShare';
   Search, Bell, Flame, Clock,
   ChevronRight, BookOpen, Zap, CheckCircle2, MessageSquare,
   Brain, Crown, Sparkles, Calendar, ArrowUp,
   FileText, Trophy
 } from 'lucide-react';
+import WhatsAppShare from '../components/WhatsAppShare';
 
 export const Dashboard = () => {
   const { subjects, schedule, dashboard, progress, isLoading, error } = useDashboard();
