@@ -15,7 +15,6 @@ import {
   FileText, Trophy
 } from 'lucide-react';
 import WhatsAppShare from '../components/WhatsAppShare';
-import ExamPressureSimulator from '../components/ExamPressureSimulator';
 
 export const Dashboard = () => {
   const { subjects, schedule, dashboard, progress, isLoading, error } = useDashboard();
