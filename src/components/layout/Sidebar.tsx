@@ -7,6 +7,7 @@ import {
   LayoutDashboard, MessageSquare, FileText, ClipboardList,
   Zap, GraduationCap, LogOut, Crown, ChevronRight, TrendingUp, Bell, BookMarked,
   Settings,
+  Gift,
   Swords
 } from 'lucide-react';
 
@@ -19,7 +20,8 @@ const NAV_ITEMS = [
   { name: 'Exam Simulation',  icon: ClipboardList,   path: '/simulation'    },
   { name: 'Likely Questions', icon: TrendingUp,      path: '/likely-questions' },
   { name: 'Emergency Mode',   icon: Zap,             path: '/emergency', special: true },
-  { name: 'Settings',         icon: Settings,        path: '/settings'      },
+  { name: 'Settings',         icon: Settings,
+  Gift,        path: '/settings'      },
 ];
 
 interface SidebarProps { className?: string; }

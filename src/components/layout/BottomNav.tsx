@@ -8,6 +8,7 @@ import {
   Trophy,
   Zap,
   Settings,
+  Gift,
 } from 'lucide-react';
 
 // ─── Tab definitions ─────────────────────────────
@@ -47,6 +48,7 @@ const TABS = [
     label: 'Settings',
     to:    '/settings',
     icon:  Settings,
+  Gift,
     match: ['/settings'],
   },
 ] as const;

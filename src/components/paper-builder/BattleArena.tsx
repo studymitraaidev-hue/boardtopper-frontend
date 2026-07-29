@@ -78,6 +78,13 @@ export default function BattleArena({ paper, onComplete }: BattleArenaProps) {
     }, 1000);
     return () => clearInterval(interval);
   }, [phase]);
+// Early defeat check — if player HP hits 0, end battle immediately
+  useEffect(() => {
+    if (phase === 'battle' && playerHp <= 0) {
+      setPhase('defeat');
+      setTimeout(() => onComplete(0, paper.totalMarks, answers, selectedOptions), 2000);
+    }
+  }, [playerHp, phase]);
 
   const handleTimeUp = () => {
     calculateFinalScore();
