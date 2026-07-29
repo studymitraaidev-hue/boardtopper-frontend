@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { cn } from '../utils/cn';
 import {
+import WhatsAppShare from '../components/WhatsAppShare';
   Search, Bell, Flame, Clock,
   ChevronRight, BookOpen, Zap, CheckCircle2, MessageSquare,
   Brain, Crown, Sparkles, Calendar, ArrowUp,
@@ -484,6 +485,19 @@ export const Dashboard = () => {
             ))}
           </div>
 
+
+          {/* -- WhatsApp Share Progress -- */}
+          <div className="mt-2">
+            <WhatsAppShare
+              userName={firstName}
+              streakCount={progress.streakCount || 0}
+              totalCompleted={progress.totalCompleted || 0}
+              mockScoreAvg={progress.mockScoreAvg}
+              weakTopics={dashboard.weakTopics || []}
+              targetPercent={user?.targetPercent || 90}
+              isPro={isPro}
+            />
+          </div>
           {/* ── Main Grid ── */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
 
