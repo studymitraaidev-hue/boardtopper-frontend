@@ -15,6 +15,7 @@ import {
   FileText, Trophy
 } from 'lucide-react';
 import WhatsAppShare from '../components/WhatsAppShare';
+import ExamPressureSimulator from '../components/ExamPressureSimulator';
 
 export const Dashboard = () => {
   const { subjects, schedule, dashboard, progress, isLoading, error } = useDashboard();
@@ -497,6 +498,27 @@ export const Dashboard = () => {
               targetPercent={user?.targetPercent || 90}
               isPro={isPro}
             />
+          </div>
+
+          {/* -- Exam Pressure Training -- */}
+          <div className="mt-3">
+            <Link to="/exam-pressure" className="block">
+              <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-950/50 via-slate-900 to-slate-900 p-4 hover:border-red-500/40 transition-all active:scale-[0.98]">
+                <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-red-600/10 blur-2xl" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-red-500/20 border border-red-500/30 shrink-0">
+                    <AlertTriangle size={18} className="text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-white">Train Under Pressure</h3>
+                    <p className="text-xs text-white/50 mt-0.5">Screen shake + heartbeat + countdown</p>
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-white/5">
+                    <Play size={14} className="text-red-400" />
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
           {/* ── Main Grid ── */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
