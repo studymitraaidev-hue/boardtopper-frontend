@@ -5,7 +5,6 @@ import ProtectedRoute from './components/router/ProtectedRoute';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
-import ExamPressure from './pages/ExamPressure';
 
 const Dashboard         = lazy(() => import('./pages/Dashboard'));
 const DoubtSolver       = lazy(() => import('./pages/DoubtSolver'));
@@ -63,7 +62,6 @@ function App() {
                 <Route path="/onboarding"   element={<Onboarding />} />
                 <Route path="/dashboard"    element={<Dashboard />} />
                 <Route path="/doubt-solver" element={<DoubtSolver />} />
-                <Route path="/exam-pressure" element={<ExamPressure />} />
                 <Route path="/notes"        element={<NotesGenerator />} />
                 <Route path="/simulation"   element={<ExamSimulation />} />
                 <Route path="/emergency"    element={<SmartEmergencyPage />} />
